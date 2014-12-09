@@ -19,9 +19,9 @@ start = time.time()
  #             [ 0, 0, -1, 1, 0],
  #             [ 0,-1,  0,-1,-1],])
  
-Phiload = np.load('phi.npy')
-K = np.load('K.npy')
-F = np.load('F.npy')
+Phiload = np.load('./data/phi.npy')
+K = np.load('./data/K.npy')
+F = np.load('./data/F.npy')
 
 LoadSerie=100   # Load serie (calculations done on 100)
 NodeIm   =18    # Plotted Node Number for import 
@@ -146,9 +146,9 @@ print 'Final calculated flow minus given flow: %d' %np.max(np.abs(Flowtjek))
 
 
 #--------------- Saving matrices----------------------------------------------
-#np.save('NodeDist', NodeDist)
-#np.save('LinkDist', LinkDist)
-#np.save('lande', Lande)
+np.save('./results/NodeDist', NodeDist)
+np.save('./results/LinkDist', LinkDist)
+np.save('./results/lande', Lande)
 
 print 'It took', takentime, 'milliseconds per iteration.'
 
@@ -185,10 +185,10 @@ plt.subplot(2,2,4)
 for m in range(0,Nodes):
     plt.plot(range(0,NodeIte),np.sum(NodeValue2D, axis=0))
 plt.xlabel('#iterations')
-plt.ylabel('Sum of node Values')     
+plt.ylabel('Sum of node Values')
 plt.grid(True) 
 plt.title('Sum of node values in each iteration')          
 
-plt.show()
-   
-                
+plt.subplots_adjust(wspace=.5,hspace=.3,top=.8,bottom=0)
+plt.savefig('iteration_results.png',bbox_inches='tight')
+#plt.show()

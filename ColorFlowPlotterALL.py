@@ -16,18 +16,18 @@ PlotTotalLinkUsage   = False
 PlotEachLinkTraffic  = True
 
 
-NodeDist          = np.load('NodeDist.npy')
-NodeDistImport    = np.load('NodeDistimport.npy')
-LinkDist          = np.load('LinkDist.npy')
-LinkDistImport    = np.load('LinkDistimport.npy')
+NodeDist          = np.load('./results/NodeDist.npy')
+NodeDistImport    = np.load('./results/NodeDistimport.npy')
+LinkDist          = np.load('./results/LinkDist.npy')
+LinkDistImport    = np.load('./results/LinkDistimport.npy')
 
-LinkDistImport100 = np.load('link_import_100.npy')
-LinkDistExport100 = np.load('link_export_100.npy')
-NodeDistExport100 = np.load('power_mix_node_export_100.npy')
-NodeDistImport100 = np.load('power_mix_node_import_100.npy')
-F                 = np.load('F.npy')
+LinkDistImport100 = np.load('./results/link_import_100.npy')
+LinkDistExport100 = np.load('./results/link_export_100.npy')
+NodeDistExport100 = np.load('./results/power_mix_node_export_100.npy')
+NodeDistImport100 = np.load('./results/power_mix_node_import_100.npy')
+F                 = np.load('./data/F.npy')
 
-Phiload           = np.load('phi.npy')
+Phiload           = np.load('./data/phi.npy')
 LoadSerie=100
 Phi = np.round(Phiload[:,LoadSerie],2)
 Nodes=30
