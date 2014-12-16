@@ -27,7 +27,7 @@ LoadSerie=100   # Load serie (calculations done on 100)
 NodeIm   =18    # Plotted Node Number for import 
 NodeEx   =18    # Plotted Node Number for export
 LinkUsage=18    # 
-NodeIte  =1000  # Number of iterations.
+NodeIte  =200  # Number of iterations.
 
 Phi = Phiload[:,LoadSerie]
 Links=len(K.T)
@@ -189,6 +189,6 @@ plt.ylabel('Sum of node Values')
 plt.grid(True) 
 plt.title('Sum of node values in each iteration')          
 
-plt.subplots_adjust(wspace=.5,hspace=.3,top=.8,bottom=0)
+plt.subplots_adjust(wspace=.5,hspace=.3)
 plt.savefig('iteration_results.png',bbox_inches='tight')
 #plt.show()
