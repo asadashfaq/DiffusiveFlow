@@ -8,7 +8,6 @@ A collection of functions used for the diffusive approach to flow tracing.
 
 """
 import time
-import sys
 import numpy as np
 
 """
@@ -61,10 +60,10 @@ def diffusiveIterator(timeStep, Phi, K, F, objective, direction='export'):
     d = 0
     e = 0
     
-    target = objective + 1
-    target2 = None
+    meanFlow = objective + 1
+    meanFlow2 = None
     
-    while target > objective:
+    while meanFlow > objective:
 
         for noderun in range(0, Nodes):  # run through all node
             # node is sink and ejects all
@@ -129,19 +128,19 @@ def diffusiveIterator(timeStep, Phi, K, F, objective, direction='export'):
                     NodeValue[:, e, iteration + 1] += abs(LinkValueNeg[:, linkrun, iteration])
                     NodeValueSave[:, e, iteration + 1] += abs(LinkValueNeg[:, linkrun, iteration])
 
-        target = convergenceCheck(F, timeStep, LinkValuePos, LinkValueNeg)
+        meanFlow = convergenceCheck(F, timeStep, LinkValuePos, LinkValueNeg)
 
         iteration += 1
 
         if iteration == NodeIte-1:
-            target2 = target
-            target = objective-1
+            meanFlow2 = meanFlow
+            meanFlow = objective-1
 
     print 'Iterations: ',iteration
-    if target2:
-        print 'Final calculated flow minus given flow: ' + str("%.5f" % target2)
+    if meanFlow2:
+        print 'Final calculated flow minus given flow: ' + str("%.5f" % meanFlow2)
     else:
-        print 'Final calculated flow minus given flow: ' + str("%.5f" % target)
+        print 'Final calculated flow minus given flow: ' + str("%.5f" % meanFlow)
 
     NodeDist = sum(NodeValue, axis=2) + sum(NodeValueSave2, axis=2)
     LinkValue = LinkValuePos + LinkValueNeg
