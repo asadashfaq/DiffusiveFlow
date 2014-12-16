@@ -16,22 +16,21 @@ import numpy as np
     F = np.load('./data/F.npy')
 """
 
-def convergenceCheck(F, timeStep, LinkValuePos, LinkValueNeg):
+def convergenceCheck(F, LinkValuePos, LinkValueNeg):
     """
     Check convergence of diffusive flow to solver flow.
     """
     LinkValue = LinkValuePos + LinkValueNeg
     LinkDist = sum(LinkValue, axis=2)
-    FlowCheck= sum(LinkDist[:, :], axis=0) - F[:, timeStep]
+    FlowCheck= sum(LinkDist[:, :], axis=0) - F
     return np.mean(np.abs(FlowCheck))
 
-def diffusiveIterator(timeStep, Phi, K, F, objective, direction='export'):
+def diffusiveIterator(Phi, K, F, objective, fraction=1, direction='export', verbose=False):
     start = time.time()
-    NodeIte = 1000 # maximum number of iterations
-    Phi = Phi[:, timeStep]
+    NodeIte = 2000 # maximum number of iterations
     Nodes, Links = K.shape
     RoundSumPhi = round(sum(Phi), 2)
-    print 'Sum of initial node Values: ' + str("%.5f" % RoundSumPhi)
+    if verbose: print 'Sum of initial node Values: ' + str("%.5f" % RoundSumPhi)
 
     if direction == 'import':
         Phi = -Phi
@@ -42,7 +41,7 @@ def diffusiveIterator(timeStep, Phi, K, F, objective, direction='export'):
     NodeValueSave2 = np.zeros((Nodes, Nodes, NodeIte))  # overflow values
 
     # Puts the injection pattern on the diagonal of the NodeValue matrix    
-    np.fill_diagonal(NodeValue[:,:,0], Phi)
+    np.fill_diagonal(NodeValue[:, :, 0], Phi)
     np.fill_diagonal(NodeValueSave[:, :, 0], Phi)
 
     # store link values in positive direction
@@ -68,14 +67,14 @@ def diffusiveIterator(timeStep, Phi, K, F, objective, direction='export'):
         for noderun in range(0, Nodes):  # run through all node
             # node is sink and ejects all
             if sum(NodeValue[:, noderun, iteration]) <= 0:
-                NodeValue[noderun, noderun, iteration + 1] += np.sum(NodeValue[:, noderun, iteration])
-                NodeValueSave[noderun, noderun, iteration + 1] += np.sum(NodeValue[:, noderun, iteration])
+                NodeValue[noderun, noderun, iteration + 1] += np.sum(NodeValue[:, noderun, iteration]) * fraction
+                NodeValueSave[noderun, noderun, iteration + 1] += np.sum(NodeValue[:, noderun, iteration]) * fraction
 
             else:  # if the sum of a node is positive:
                 if np.min(NodeValue[noderun, noderun, iteration]) < 0:
                     # if the average is larger than zero but it contains a negativ number
                     # - node is a sink, but there is going to be overflow
-                    givefraction = np.abs(NodeValue[noderun, noderun, iteration]) / np.sum(NodeValue[:, noderun, iteration].clip(0))
+                    givefraction = np.abs(NodeValue[noderun, noderun, iteration]) / np.sum(NodeValue[:, noderun, iteration].clip(0)) * fraction
                     # how much of each node that is ejected
                     injectfraction = 1 - givefraction
                     # how much of each node that is injected again.
@@ -128,7 +127,7 @@ def diffusiveIterator(timeStep, Phi, K, F, objective, direction='export'):
                     NodeValue[:, e, iteration + 1] += abs(LinkValueNeg[:, linkrun, iteration])
                     NodeValueSave[:, e, iteration + 1] += abs(LinkValueNeg[:, linkrun, iteration])
 
-        meanFlow = convergenceCheck(F, timeStep, LinkValuePos, LinkValueNeg)
+        meanFlow = convergenceCheck(F, LinkValuePos, LinkValueNeg)
 
         iteration += 1
 
@@ -136,11 +135,12 @@ def diffusiveIterator(timeStep, Phi, K, F, objective, direction='export'):
             meanFlow2 = meanFlow
             meanFlow = objective-1
 
-    print 'Iterations: ',iteration
-    if meanFlow2:
-        print 'Final calculated flow minus given flow: ' + str("%.5f" % meanFlow2)
-    else:
-        print 'Final calculated flow minus given flow: ' + str("%.5f" % meanFlow)
+    if verbose:
+        print 'Iterations: ',iteration
+        if meanFlow2:
+            print 'Final calculated flow minus given flow: ' + str("%.5f" % meanFlow2)
+        else:
+            print 'Final calculated flow minus given flow: ' + str("%.5f" % meanFlow)
 
     NodeDist = sum(NodeValue, axis=2) + sum(NodeValueSave2, axis=2)
     LinkValue = LinkValuePos + LinkValueNeg
@@ -151,6 +151,6 @@ def diffusiveIterator(timeStep, Phi, K, F, objective, direction='export'):
         NodeDist[a, a] = - np.max(NodeValueSave[a, a, :])
 
     takentime = np.round((time.time() - start) / iteration * 1000, 2)
-    print 'It took', takentime, 'milliseconds per iteration.'
-    print 'It took', np.round(time.time() - start, 2), 'seconds in total.'
-    return  NodeDist, LinkDist
+    if verbose: print 'It took', takentime, 'milliseconds per iteration.'
+    if verbose: print 'It took', np.round(time.time() - start, 2), 'seconds in total.'
+    return  NodeDist, LinkDist, iteration
