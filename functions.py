@@ -8,6 +8,7 @@ A collection of functions used for the diffusive approach to flow tracing.
 
 """
 import time
+import sys
 import numpy as np
 
 """
@@ -16,28 +17,34 @@ import numpy as np
     F = np.load('./data/F.npy')
 """
 
+def convergenceCheck(F, timeStep, LinkValuePos, LinkValueNeg):
+    """
+    Check convergence of diffusive flow to solver flow.
+    """
+    LinkValue = LinkValuePos + LinkValueNeg
+    LinkDist = sum(LinkValue, axis=2)
+    FlowCheck= sum(LinkDist[:, :], axis=0) - F[:, timeStep]
+    return np.mean(np.abs(FlowCheck))
 
-def diffusiveIterator(timeStep, injectionPattern, K, F, nIterations,
-                      direction='export'):
+def diffusiveIterator(timeStep, Phi, K, F, objective, direction='export'):
     start = time.time()
-    NodeIte = nIterations
-    Phi = injectionPattern[:, timeStep]
+    NodeIte = 1000 # maximum number of iterations
+    Phi = Phi[:, timeStep]
     Nodes, Links = K.shape
     RoundSumPhi = round(sum(Phi), 2)
     print 'Sum of initial node Values: ' + str("%.5f" % RoundSumPhi)
 
     if direction == 'import':
         Phi = -Phi
+        K = -K
 
     NodeValue = np.zeros((Nodes, Nodes, NodeIte))  # work horse
     NodeValueSave = np.zeros((Nodes, Nodes, NodeIte))  # for the archives
     NodeValueSave2 = np.zeros((Nodes, Nodes, NodeIte))  # overflow values
 
-    NodeInitial = 0
-    # Puts the injection pattern on the diagonal of the NodeValue matrix
-    for NodeInitial in range(0, Nodes):
-        NodeValue[NodeInitial, NodeInitial, 0] = Phi[NodeInitial]
-        NodeValueSave[NodeInitial, NodeInitial, 0] = Phi[NodeInitial]
+    # Puts the injection pattern on the diagonal of the NodeValue matrix    
+    np.fill_diagonal(NodeValue[:,:,0], Phi)
+    np.fill_diagonal(NodeValueSave[:, :, 0], Phi)
 
     # store link values in positive direction
     LinkValuePos = np.zeros((Nodes, Links, NodeIte))
@@ -47,24 +54,22 @@ def diffusiveIterator(timeStep, injectionPattern, K, F, nIterations,
     # array of row numbers with starting negative injection pattern
     PhiNeg = [i for i, j in enumerate(Phi) if j < 0]
 
-    # to display node number and start injection pattern
-    Lande = np.zeros((Nodes, 2))
-    Lande[:, 0] = range(0, Nodes)
-    Lande[:, 1] = Phi
-
     iteration = 0
     PosNegLinkRun = 0
     noderun = 0
     linkrun = 0
     d = 0
     e = 0
-    for iteration in range(0, NodeIte - 1):  # run for iterations
-        for noderun in range(0, Nodes):  # run through all node
+    
+    target = objective + 1
+    target2 = None
+    
+    while target > objective:
 
+        for noderun in range(0, Nodes):  # run through all node
             # node is sink and ejects all
             if sum(NodeValue[:, noderun, iteration]) <= 0:
-                NodeValue[noderun, noderun, iteration +
-                          1] += np.sum(NodeValue[:, noderun, iteration])
+                NodeValue[noderun, noderun, iteration + 1] += np.sum(NodeValue[:, noderun, iteration])
                 NodeValueSave[noderun, noderun, iteration + 1] += np.sum(NodeValue[:, noderun, iteration])
 
             else:  # if the sum of a node is positive:
@@ -124,29 +129,29 @@ def diffusiveIterator(timeStep, injectionPattern, K, F, nIterations,
                     NodeValue[:, e, iteration + 1] += abs(LinkValueNeg[:, linkrun, iteration])
                     NodeValueSave[:, e, iteration + 1] += abs(LinkValueNeg[:, linkrun, iteration])
 
-    NodeValue2D = np.zeros((Nodes, NodeIte))
-    LinkValue = np.zeros((Nodes, Links, NodeIte))
+        target = convergenceCheck(F, timeStep, LinkValuePos, LinkValueNeg)
 
-    LinkValue[:, :, :] = LinkValuePos[:, :, :] + LinkValueNeg[:, :, :]
+        iteration += 1
 
-    # NodeValueSave2 for overflow
+        if iteration == NodeIte-1:
+            target2 = target
+            target = objective-1
+
+    print 'Iterations: ',iteration
+    if target2:
+        print 'Final calculated flow minus given flow: ' + str("%.5f" % target2)
+    else:
+        print 'Final calculated flow minus given flow: ' + str("%.5f" % target)
+
     NodeDist = sum(NodeValue, axis=2) + sum(NodeValueSave2, axis=2)
+    LinkValue = LinkValuePos + LinkValueNeg
     LinkDist = sum(LinkValue, axis=2)
-
-    NodeValue2D = np.sum(NodeValueSave, axis=0)
-
-    LinkValue2D = np.sum(LinkValue, axis=0)
-    AcumSumLink = np.cumsum(LinkValue2D, axis=1)
-
-    takentime = np.round((time.time() - start) / NodeIte * 1000, 2)
 
     a = 0
     for a in PhiNeg:
         NodeDist[a, a] = - np.max(NodeValueSave[a, a, :])
-    Phitjek1 = sum(NodeDist, axis=1) - Phi.T.clip(0)
-    Phitjek2 = sum(NodeDist, axis=0) - np.abs(Phi.T.clip(-100000000000000, 0))
-    Flowtjek = sum(LinkDist[:, :], axis=0) - F[:, timeStep]
-    print 'Final Injection pattern max value: ' + str("%.5f" % np.max(np.abs(Phitjek1)))
-    print 'Final calculated flow minus given flow: ' + str("%.5f" % np.max(np.abs(Flowtjek)))
+
+    takentime = np.round((time.time() - start) / iteration * 1000, 2)
     print 'It took', takentime, 'milliseconds per iteration.'
-    return  NodeDist, LinkDist, Lande
+    print 'It took', np.round(time.time() - start, 2), 'seconds in total.'
+    return  NodeDist, LinkDist
