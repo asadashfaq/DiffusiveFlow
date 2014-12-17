@@ -70,16 +70,28 @@ def diffusiveIterator(Phi, K, F, objective, fraction=1, direction='export', verb
                 NodeValue[noderun, noderun, iteration + 1] += np.sum(NodeValue[:, noderun, iteration]) * fraction
                 NodeValueSave[noderun, noderun, iteration + 1] += np.sum(NodeValue[:, noderun, iteration]) * fraction
 
+                NOL = abs(K[noderun, :]).sum() * 1.  # Number of links
+                # devide node value with number of links
+                NewValue = NodeValue[:, noderun, iteration].clip(0) * (1-fraction) / NOL
+                for PosNegLinkRun in range(0, Links):
+                    if K[noderun, PosNegLinkRun] > 0:
+                        LinkValuePos[:, PosNegLinkRun, iteration] = LinkValuePos[:, PosNegLinkRun, iteration] + NewValue
+                    if K[noderun, PosNegLinkRun] < 0:
+                        LinkValueNeg[:, PosNegLinkRun, iteration] = LinkValueNeg[:, PosNegLinkRun, iteration] - NewValue
+
+                NodeValue[:, noderun, iteration] = 0
+                NodeValue[noderun, noderun, iteration] = NodeValueSave[noderun, noderun, iteration+1]
+
             else:  # if the sum of a node is positive:
                 if np.min(NodeValue[noderun, noderun, iteration]) < 0:
                     # if the average is larger than zero but it contains a negativ number
                     # - node is a sink, but there is going to be overflow
-                    givefraction = np.abs(NodeValue[noderun, noderun, iteration]) / np.sum(NodeValue[:, noderun, iteration].clip(0)) * fraction
+                    ejectfraction = np.abs(NodeValue[noderun, noderun, iteration]) / np.sum(NodeValue[:, noderun, iteration].clip(0)) * fraction
                     # how much of each node that is ejected
-                    injectfraction = 1 - givefraction
+                    injectfraction = 1 - ejectfraction
                     # how much of each node that is injected again.
 
-                    NodeValueSave2[:, noderun, iteration] = NodeValueSave[:, noderun, iteration] * givefraction
+                    NodeValueSave2[:, noderun, iteration] = NodeValueSave[:, noderun, iteration] * ejectfraction
                     # to have the value of ejected
                     NodeValueSave[:, noderun, iteration] = NodeValueSave[:, noderun, iteration] * injectfraction
                     # to save the value of injected
