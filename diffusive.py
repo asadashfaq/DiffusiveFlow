@@ -34,11 +34,13 @@ def diffusiveIterator(A, phi, timeStep, limit=False, objective=False):
     objective:  convergence limit
     """
 
+    if not (limit and objective): limit = 100
+
     nodes = A.shape[0]
     degrees = nodeDegree(A, range(nodes))
 
-    posIndex = np.where(phi[timeStep] > 0)
-    negIndex = np.where(phi[timeStep] < 0)
+    posIndex = np.where(phi[:,timeStep] > 0)
+    negIndex = np.where(phi[:,timeStep] < 0)
 
     # pp: positive part of injection
     # pn: negative part of injection
