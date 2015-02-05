@@ -7,19 +7,27 @@ Diffusive iterator to solve and trace power flow
 
 def nodeDegree(A, n):
     """
-    Calculalte node degree from adjacency matrix
+    Calculate node degree(s) from adjacency matrix. Input can be a single index
+    or a list of indices.
     """
+    if not (type(n) == int or type(n) == list):
+        raise Exception('input type should be _int_ or _list_')
     if type(n) == int:
         return int(sum(A[n]))
     if type(n) == list:
         return np.array([nodeDegree(A,i) for i in n])
 
-def normalise(v):
+def norm(v):
+    """
+    Normalise input vector.
+    """
     if sum(v) != 0:
         return v/sum(v)
-    else: return v
+    else:
+        print('Sum of vector equals zero. Returning un-normalised vector')
+        return v
 
-def diffusiveIterator(A, K, phi, timeStep, limit=False, objective=False):
+def diffusiveIterator(A, phi, timeStep, limit=False, objective=False):
     """
     A:          adjacency matrix
     K:          incidence matrix
@@ -39,59 +47,61 @@ def diffusiveIterator(A, K, phi, timeStep, limit=False, objective=False):
     degrees = nodeDegree(A, range(nodes))
     links = len(np.where(A)[0])/2
 
-    # pp: positive part of injection
-    # pn: negative part of injection
-    pp, pn = np.zeros(nodes), np.zeros(nodes)
+    # pp: positive part of injection pattern
+    # pn: negative part of injection pattern
+    pp, pn = np.zeros((nodes, nodes)), np.zeros((nodes, nodes))
 
-    for i, p in enumerate(phi[:, timeStep]):
-        if p > 0: pp[i] = p
-        if p < 0: pn[i] = p
-    initPower = sum(pp)
+    for i, p in enumerate(phi):
+        if p > 0: pp[i,i] = p
+        if p < 0: pn[i,i] = p
+    initPower = sum(sum(pp))
 
     # Adjacency matrix scaled with node degrees. Column i is divided by the
     # degree of node i.
     Amod = np.array([A[i] / degrees[i] for i in range(nodes)]).transpose()
 
-    # Prepare vectors for saving flow and power mixes
+    # Prepare vectors for saving flow
     linkFlow = np.zeros((nodes, links))
-    nodeColor = np.zeros((nodes, nodes))
 
     # ITERATE
     iterate = True
     iteration = 0
     while(iterate):
         iteration += 1
-        R = np.dot(Amod, pp)
+        R = np.zeros((nodes, nodes))
+        for i in range(nodes):
+            R += np.array(np.dot(np.reshape(Amod[:,i], (nodes,1)), np.reshape(pp[i], (1, nodes))))
 
         # update colors and link flows
-        nodeColor += np.multiply(Amod, pp)
-        linkFlow += np.array([K[i]*pp[i]/degrees[i] for i in range(nodes)])
+        # linkFlow += np.array([K[i]*np.sum(pp, axis=1)[i]/degrees[i] for i in range(nodes)])
 
         # compare R with P-, update P-, P+
-        pp = np.zeros(nodes)
+        pp = np.zeros((nodes, nodes))
         for i, p in enumerate(R):
-            if p == 0: continue
-            elif p <= abs(pn[i]):
+            if sum(pn[i]) == 0: continue
+            if sum(pn[i]) < 0:
                 pn[i] += p
-            elif p > abs(pn[i]):
-                pp[i] = p + pn[i]
-                pn[i] = 0
+            if sum(pn[i]) > 0:
+                print i
+                pp[i] = norm(p)*sum(pn[i])
 
         # check convergence
-        powerFrac = sum(pp)/initPower*100
+        powerFrac = sum(sum(pp))/initPower*100
+        print iteration, powerFrac
         if limit:
             if iteration == limit: iterate = False
         if objective:
             if powerFrac <= objective: iterate = False
 
-    # normalise colors and sum link flows before returning
-    nodeColor = np.array([normalise(nodeColor) for i in range(nodes)])
+    # sum link flows before returning
     linkFlow = np.sum(linkFlow, axis=0)
 
-    return iteration, powerFrac, nodeColor, linkFlow, initPower
+    return iteration, powerFrac, linkFlow, initPower, Amod, R, pp, pn
 
 # Test function
-A = np.loadtxt('./settings/Europeadmat.txt')
-K = np.load('data/K.npy')
-phi = np.load('./data/phi.npy')
-t = 10
+# A = np.loadtxt('./settings/Europeadmat.txt')
+# K = np.load('data/K.npy')
+# phi = np.load('./data/phi.npy')
+A = np.array([[0,1,0,1,1],[1,0,1,1,0],[0,1,0,1,0],[1,1,1,0,1],[1,0,0,1,0]])
+phi = np.array([6,-2,3,2,-9])
+t = 0
