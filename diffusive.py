@@ -27,7 +27,7 @@ def norm(v):
         print('Sum of vector equals zero. Returning un-normalised vector')
         return v
 
-def diffusiveIterator(A, phi, timeStep, limit=False, objective=False):
+def diffusiveIterator(A, K, phi, timeStep, limit=False, objective=False):
     """
     A:          adjacency matrix
     K:          incidence matrix
@@ -51,7 +51,7 @@ def diffusiveIterator(A, phi, timeStep, limit=False, objective=False):
     # pn: negative part of injection pattern
     pp, pn = np.zeros((nodes, nodes)), np.zeros((nodes, nodes))
 
-    for i, p in enumerate(phi):
+    for i, p in enumerate(phi[:, timeStep]):
         if p > 0: pp[i,i] = p
         if p < 0: pn[i,i] = p
     initPower = sum(sum(pp))
@@ -73,20 +73,22 @@ def diffusiveIterator(A, phi, timeStep, limit=False, objective=False):
             R += np.array(np.dot(np.reshape(Amod[:,i], (nodes,1)), np.reshape(pp[i], (1, nodes))))
 
         # update colors and link flows
-        # linkFlow += np.array([K[i]*np.sum(pp, axis=1)[i]/degrees[i] for i in range(nodes)])
+        linkFlow += np.array([K[n]*np.sum(pp, axis=1)[n]/degrees[n] for n in range(nodes)])
 
         # compare R with P-, update P-, P+
         pp = np.zeros((nodes, nodes))
         for i, p in enumerate(R):
-            if sum(pn[i]) == 0:
+            if np.round(sum(pn[i]), 6) == 0:
                 pp[i] = p
-            if sum(pn[i]) < 0:
+            if np.round(sum(pn[i]), 6) < 0:
                 pn[i] += p
-            if sum(pn[i]) > 0:
-                sink = pn[i,i]
-                pn[i] /= np.abs(sink)
-                pn[i,i] = sink
-                pp[i] = norm(p)*sum(pn[i])
+            if np.round(sum(pn[i]), 6) > 0:
+                sinkStrength = pn[i,i]
+                sourceStrength = sum(pn[i])
+                pn[i,i] = 0
+                pn[i] = norm(pn[i])*abs(sinkStrength)
+                pn[i,i] = sinkStrength
+                pp[i] = norm(p)*sourceStrength
 
         # check convergence
         powerFrac = sum(sum(pp))/initPower*100
@@ -101,9 +103,9 @@ def diffusiveIterator(A, phi, timeStep, limit=False, objective=False):
     return iteration, powerFrac, linkFlow, initPower, Amod, R, pp, pn
 
 # Test function
-# A = np.loadtxt('./settings/Europeadmat.txt')
-# K = np.load('data/K.npy')
-# phi = np.load('./data/phi.npy')
-A = np.array([[0,1,0,1,1],[1,0,1,1,0],[0,1,0,1,0],[1,1,1,0,1],[1,0,0,1,0]])
-phi = np.array([6,-2,3,2,-9])
-t = 0
+A = np.loadtxt('./settings/Europeadmat.txt')
+K = np.load('data/K.npy')
+phi = np.load('./data/phi.npy')
+#A = np.array([[0,1,0,1,1],[1,0,1,1,0],[0,1,0,1,0],[1,1,1,0,1],[1,0,0,1,0]])
+#phi = np.array([6,-2,3,2,-9])
+t = 100
