@@ -78,16 +78,18 @@ def diffusiveIterator(A, phi, timeStep, limit=False, objective=False):
         # compare R with P-, update P-, P+
         pp = np.zeros((nodes, nodes))
         for i, p in enumerate(R):
-            if sum(pn[i]) == 0: continue
+            if sum(pn[i]) == 0:
+                pp[i] = p
             if sum(pn[i]) < 0:
                 pn[i] += p
             if sum(pn[i]) > 0:
-                print i
+                sink = pn[i,i]
+                pn[i] /= np.abs(sink)
+                pn[i,i] = sink
                 pp[i] = norm(p)*sum(pn[i])
 
         # check convergence
         powerFrac = sum(sum(pp))/initPower*100
-        print iteration, powerFrac
         if limit:
             if iteration == limit: iterate = False
         if objective:
