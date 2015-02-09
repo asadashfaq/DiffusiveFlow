@@ -1,0 +1,17 @@
+Diffusive iterator TODO:
+
+    Flow tracing:
+        ☐ Add absolute color contributions in each iteration
+        ☐ Normalise color vectors after iteration end: sum of each vector is unity
+        ☐ diagonal is source/sink strength of node i
+        ☐ each row of P+ contains contributions from all other nodes to node i's injection
+        ☐ sum of each row in P is passed on in next iteration step
+        ☐ each row of P- contains contributions from all other nodes to node i's power mix
+
+    Fractional sinks:
+        ☐ introduce the lambda parameter so sinks will only get a fraction of what is available
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+Archive:
+
+    Power flow solution: @done(2015-02-06 16:31) @project(Power flow solution)
+    ✔ use the incidence matrix to keep track of the direction of flow on the links during iterations @done(2015-02-06 16:31) @project(Power flow solution)
