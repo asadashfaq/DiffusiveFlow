@@ -1,8 +1,8 @@
 Diffusive iterator TODO:
 
     Flow tracing:
-        ☐ Add absolute color contributions in each iteration
-        ☐ Normalise color vectors after iteration end: sum of each vector is unity
+        ✔ Add absolute color contributions in each iteration @done(2015-02-10 15:59) @project(Flow tracing)
+        ✘ Normalise color vectors after iteration end: sum of each vector is unity @cancelled(2015-02-10 15:59) @project(    Flow tracing)
 
     Fractional sinks:
         ☐ introduce the lambda parameter so sinks will only get a fraction of what is available

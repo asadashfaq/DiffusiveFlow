@@ -61,7 +61,7 @@ def diffusiveIterator(A, K, phi, timeStep, limit=False, objective=False):
     Amod = np.array([A[i] / degrees[i] for i in range(nodes)]).transpose()
 
     # Prepare vectors for saving flow
-    linkFlow = np.zeros((nodes, links))
+    linkFlow = np.zeros((nodes, links, nodes))
 
     # ITERATE
     iterate = True
@@ -73,7 +73,8 @@ def diffusiveIterator(A, K, phi, timeStep, limit=False, objective=False):
             R += np.array(np.dot(np.reshape(Amod[:,i], (nodes,1)), np.reshape(pp[i], (1, nodes))))
 
         # update colors and link flows
-        linkFlow += np.array([K[n]*np.sum(pp, axis=1)[n]/degrees[n] for n in range(nodes)])
+        for n in range(nodes):
+            linkFlow[n, :, :] += np.outer(K[n], pp[n]/degrees[n])
 
         # compare R with P-, update P-, P+
         pp = np.zeros((nodes, nodes))
@@ -97,15 +98,13 @@ def diffusiveIterator(A, K, phi, timeStep, limit=False, objective=False):
         if objective:
             if powerFrac <= objective: iterate = False
 
-    # sum link flows before returning
-    linkFlow = np.sum(linkFlow, axis=0)
-
     return iteration, powerFrac, linkFlow, initPower, Amod, R, pp, pn
 
 # Test function
 A = np.loadtxt('./settings/Europeadmat.txt')
 K = np.load('data/K.npy')
 phi = np.load('./data/phi.npy')
-#A = np.array([[0,1,0,1,1],[1,0,1,1,0],[0,1,0,1,0],[1,1,1,0,1],[1,0,0,1,0]])
-#phi = np.array([6,-2,3,2,-9])
+# A = np.array([[0,1,0,1,1],[1,0,1,1,0],[0,1,0,1,0],[1,1,1,0,1],[1,0,0,1,0]])
+# K = np.array([[1,0,0,0,-1,0,1],[-1,1,0,1,0,0,0],[0,-1,-1,0,0,0,0],[0,0,1,-1,1,1,0],[0,0,0,0,0,-1,-1]])
+# phi = np.array([6,-2,3,2,-9])
 t = 100
