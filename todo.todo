@@ -3,9 +3,15 @@ Diffusive iterator TODO:
     Flow tracing:
         ✔ Add absolute color contributions in each iteration @done(2015-02-10 15:59) @project(Flow tracing)
         ✘ Normalise color vectors after iteration end: sum of each vector is unity @cancelled(2015-02-10 15:59) @project(    Flow tracing)
+        ☐ direction: import/export
 
     Fractional sinks:
         ☐ introduce the lambda parameter so sinks will only get a fraction of what is available
+
+    Plotting:
+        ☐ Compare node power mix of diffusive flow with up/downstream approach
+        ☐ Compare link power mix of diffusive flow with up/downstream approach
+        ☐ Compare power mixes as funktion of fracional sinks
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
 
