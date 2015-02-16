@@ -27,12 +27,13 @@ def norm(v):
         print('Sum of vector equals zero. Returning un-normalised vector')
         return v
 
-def diffusiveIterator(A, K, phi, timeStep, limit=False, objective=False):
+def diffusiveIterator(A, K, phi, timeStep, direction='export', limit=False, objective=False):
     """
     A:          adjacency matrix
     K:          incidence matrix
     phi:        injection pattern
     timeStep:   what hour of the time series to solve
+    direction:  'export' or 'import'. What flows we are looking for
     limit:      maximum number of iterations
     objective:  convergence objective - percentage of total initial injection
 
@@ -42,6 +43,10 @@ def diffusiveIterator(A, K, phi, timeStep, limit=False, objective=False):
     """
 
     if not (limit or objective): limit = 100
+
+    if direction == 'import':
+        phi = -phi
+        K = -K
 
     nodes = A.shape[0]
     degrees = nodeDegree(A, range(nodes))
@@ -98,13 +103,15 @@ def diffusiveIterator(A, K, phi, timeStep, limit=False, objective=False):
         if objective:
             if powerFrac <= objective: iterate = False
 
-    return iteration, powerFrac, linkFlow, initPower, Amod, R, pp, pn
+    return iteration, powerFrac, initPower, linkFlow, pn
 
 # Test function
 A = np.loadtxt('./settings/Europeadmat.txt')
 K = np.load('data/K.npy')
 phi = np.load('./data/phi.npy')
+t = 100
+
+# Test case
 # A = np.array([[0,1,0,1,1],[1,0,1,1,0],[0,1,0,1,0],[1,1,1,0,1],[1,0,0,1,0]])
 # K = np.array([[1,0,0,0,-1,0,1],[-1,1,0,1,0,0,0],[0,-1,-1,0,0,0,0],[0,0,1,-1,1,1,0],[0,0,0,0,0,-1,-1]])
 # phi = np.array([6,-2,3,2,-9])
-t = 100
