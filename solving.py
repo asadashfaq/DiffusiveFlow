@@ -22,6 +22,7 @@ def solver(startPoint):
     """
     for t in range(int(startPoint), int(startPoint+interval)):
         i, pf, ip, lf, pn = diffusiveIterator(A, K, phi, t, frac=1, direction='export', objective=.1)
+        lf = np.sum(lf, 0)
         np.savez(savePath+str(t)+'_o_'+str(.1)+'.npz', i=i, powerFrac=pf, linkFlow=lf, powerMix=pn)
 
 if 'timeseries' in task:
