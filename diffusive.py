@@ -27,12 +27,13 @@ def norm(v):
         print('Sum of vector equals zero. Returning un-normalised vector')
         return v
 
-def diffusiveIterator(A, K, phi, timeStep, direction='export', limit=False, objective=False):
+def diffusiveIterator(A, K, phi, timeStep, frac=1, direction='export', limit=False, objective=False):
     """
     A:          adjacency matrix
     K:          incidence matrix
     phi:        injection pattern
     timeStep:   what hour of the time series to solve
+    frac:       the fraction of available power that sinks are allowed to get
     direction:  'export' or 'import'. What flows we are looking for
     limit:      maximum number of iterations
     objective:  convergence objective - percentage of total initial injection
@@ -87,14 +88,15 @@ def diffusiveIterator(A, K, phi, timeStep, direction='export', limit=False, obje
             if np.round(sum(pn[i]), 6) == 0:
                 pp[i] = p
             if np.round(sum(pn[i]), 6) < 0:
-                pn[i] += p
+                pn[i] += frac*p
+                pp[i] += (1-frac)*p
             if np.round(sum(pn[i]), 6) > 0:
                 sinkStrength = pn[i,i]
                 sourceStrength = sum(pn[i])
                 pn[i,i] = 0
                 pn[i] = norm(pn[i])*abs(sinkStrength)
                 pn[i,i] = sinkStrength
-                pp[i] = norm(p)*sourceStrength
+                pp[i] += norm(p)*sourceStrength
 
         # check convergence
         powerFrac = sum(sum(pp))/initPower*100
