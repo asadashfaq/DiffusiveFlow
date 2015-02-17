@@ -106,14 +106,3 @@ def diffusiveIterator(A, K, phi, timeStep, frac=1, direction='export', limit=Fal
             if powerFrac <= objective: iterate = False
 
     return iteration, powerFrac, initPower, linkFlow, pn
-
-# Test function
-A = np.loadtxt('./settings/Europeadmat.txt')
-K = np.load('data/K.npy')
-phi = np.load('./data/phi.npy')
-t = 100
-
-# Test case
-# A = np.array([[0,1,0,1,1],[1,0,1,1,0],[0,1,0,1,0],[1,1,1,0,1],[1,0,0,1,0]])
-# K = np.array([[1,0,0,0,-1,0,1],[-1,1,0,1,0,0,0],[0,-1,-1,0,0,0,0],[0,0,1,-1,1,1,0],[0,0,0,0,0,-1,-1]])
-# phi = np.array([6,-2,3,2,-9])
