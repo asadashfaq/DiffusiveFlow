@@ -25,16 +25,16 @@ def solver(startPoint):
     for t in range(int(startPoint), int(startPoint+interval)):
         i, pf, ip, lf, pn = diffusiveIterator(A, K, phi, t, frac=1, direction='export', limit=500, objective=.1)
         lf = np.sum(lf, 0)
-        np.savez(savePath+str(t)+'_o_'+str(.1)+'.npz', i=i, powerFrac=pf, linkFlow=lf, powerMix=pn)
+        np.savez(savePath+str(t)+'_o_'+str(.1)+'.npz', i=i, initPower=ip, powerFrac=pf, linkFlow=lf, powerMix=pn)
 
 def fractionSolver(timeStep, fractions):
     """
     Solve a single time step for a range of fractions
     """
     for fraction in fractions:
-        i, pf, ip, lf, pn = diffusiveIterator(A, K, phi, timeStep, frac=fraction, direction='export', objective=.1)
+        i, pf, ip, lf, pn = diffusiveIterator(A, K, phi, timeStep, frac=fraction, direction='export', limit=5000, objective=.1)
         lf = np.sum(lf, 0)
-        np.savez(savePath+'t_'+str(t)+'_f_'+str(fraction)+'_o_'+str(.1)+'.npz', i=i, powerFrac=pf, linkFlow=lf, powerMix=pn)
+        np.savez(savePath+'t_'+str(t)+'_f_'+str(fraction)+'_o_'+str(.1)+'.npz', i=i, initPower=ip, powerFrac=pf, linkFlow=lf, powerMix=pn)
 
 if 'fraction' in task:
     """
