@@ -1,5 +1,8 @@
 Diffusive iterator TODO:
 
+    Aggregation of entire time series:
+        ☐ figure out how to handle flows of different colors in different directions on the same link
+
     Flow tracing:
         ✔ Add absolute color contributions in each iteration @done(2015-02-10 15:59) @project(Flow tracing)
         ✘ Normalise color vectors after iteration end: sum of each vector is unity @cancelled(2015-02-10 15:59) @project(    Flow tracing)
@@ -9,9 +12,10 @@ Diffusive iterator TODO:
         ✔ introduce the lambda parameter so sinks will only get a fraction of what is available @done(2015-02-17 13:20) @project(Fractional sinks)
 
     Plotting:
+        ☐ sort nodes after mean load and mark sources and sinks for given time step
         ✔ Compare node power mix of diffusive flow with up/downstream approach @done(2015-02-16 12:07) @project(Plotting)
         ✔ Compare link power mix of diffusive flow with up/downstream approach @done(2015-02-16 13:26) @project(Plotting)
-        ☐ Compare power mixes as function of fractional sinks
+        ✔ Compare power mixes as function of fractional sinks @done(2015-02-19 15:36) @project(Plotting)
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
 
