@@ -8,9 +8,10 @@ names = ['AT', 'FI', 'NL', 'BA', 'FR', 'NO', 'BE', 'GB', 'PL', 'BG', 'GR',\
          'IT', 'SI', 'ES', 'LU', 'SK', 'EE', 'LV', 'LT']
 
 fractions = np.linspace(.1,1,10)
-timeSteps = [0, 100, 1000, 5000, 20000]
+timeSteps = np.load('./results/fraction/timeSteps.npy')
 
 for t in timeSteps:
+    t = int(t)
     # Load power mixes from up/down stream approach
     phi = np.load('./data/phi.npy')
     pm = np.load('./input/linear_pm.npz', mmap_mode='r')
@@ -42,10 +43,8 @@ for t in timeSteps:
         np.fill_diagonal(pm, 0)
         powerMix[i] = pm
 
-
     # compare power mixes from the two approaches
     # if node is a sink compare imports, if node is a source compare exports
-
     corr = np.zeros((nodes, len(fractions)))
     for n in range(nodes):
         if phi[n,t] > 0:

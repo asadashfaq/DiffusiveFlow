@@ -4,6 +4,7 @@ from time import time
 import numpy as np
 from multiprocessing import Pool
 from diffusive import diffusiveIterator
+from random import sample
 
 """
 Different ways of calling the diffusive iterator to solve the power flows and
@@ -18,6 +19,11 @@ if len(sys.argv) < 2:
 else:
     task = str(sys.argv[:])
 
+cores = 4
+A = np.loadtxt('./settings/Europeadmat.txt')
+K = np.load('data/K.npy')
+phi = np.load('./data/phi.npy')
+
 def solver(startPoint):
     """
     Solve a range of time steps for a fixed fraction
@@ -27,14 +33,15 @@ def solver(startPoint):
         lf = np.sum(lf, 0)
         np.savez(savePath+str(t)+'_o_'+str(.1)+'.npz', i=i, initPower=ip, powerFrac=pf, linkFlow=lf, powerMix=pn)
 
-def fractionSolver(timeStep, fractions):
+def fractionSolver(timeStep, fractions=None):
     """
     Solve a single time step for a range of fractions
     """
+    if not fractions: fractions = np.linspace(.1,1,10)
     for fraction in fractions:
         i, pf, ip, lf, pn = diffusiveIterator(A, K, phi, timeStep, frac=fraction, direction='export', limit=5000, objective=.1)
         lf = np.sum(lf, 0)
-        np.savez(savePath+'t_'+str(t)+'_f_'+str(fraction)+'_o_'+str(.1)+'.npz', i=i, initPower=ip, powerFrac=pf, linkFlow=lf, powerMix=pn)
+        np.savez(savePath+'t_'+str(timeStep)+'_f_'+str(fraction)+'_o_'+str(.1)+'.npz', i=i, initPower=ip, powerFrac=pf, linkFlow=lf, powerMix=pn)
 
 if 'fraction' in task:
     """
@@ -42,14 +49,15 @@ if 'fraction' in task:
     the fractional constraint on the sinks
     """
     print "Solving fractional sinks"
-    A = np.loadtxt('./settings/Europeadmat.txt')
-    K = np.load('data/K.npy')
-    phi = np.load('./data/phi.npy')
     savePath = './results/fraction/'
-    fractions = np.linspace(.1,1,10)
-    timeSteps = [0, 100, 1000, 5000, 20000]
-    for t in timeSteps:
-        fractionSolver(t, fractions)
+    usedTimes = np.load('./results/fraction/timeSteps.npy')
+    timeSteps = sample(range(70128),5)
+    for i,j in enumerate(timeSteps):
+        if j in usedTimes: timeSteps.pop(i)
+    p = Pool(cores)
+    p.map(fractionSolver, timeSteps)
+    usedTimes = np.append(usedTimes, timeSteps)
+    np.save('./results/fraction/timeSteps.npy', usedTimes)
 
 if 'timeseries' in task:
     """
@@ -58,15 +66,11 @@ if 'timeseries' in task:
     """
     print "Solving entire time series"
     start = time()
-    A = np.loadtxt('./settings/Europeadmat.txt')
-    K = np.load('data/K.npy')
-    phi = np.load('./data/phi.npy')
-    cores = 4
     savePath = './results/timeseries/'
     interval = 70128/cores
     print "Populating "+str(cores)+" workers"
-    p = Pool(cores)
     startPoints = np.linspace(0,3,4)*interval
+    p = Pool(cores)
     p.map(solver, startPoints)
     end = time()
     print "Done"
