@@ -3,14 +3,17 @@ import numpy as np
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
 
-names = ['AT', 'FI', 'NL', 'BA', 'FR', 'NO', 'BE', 'GB', 'PL', 'BG', 'GR',\
-         'PT', 'CH', 'HR', 'RO', 'CZ', 'HU', 'RS', 'DE', 'IE', 'SE', 'DK',\
-         'IT', 'SI', 'ES', 'LU', 'SK', 'EE', 'LV', 'LT']
-
 fractions = np.linspace(.1,1,10)
 timeSteps = np.load('./results/fraction/timeSteps.npy')
 
+order = np.array([18,  4,  7, 22, 24, 20,  8,  5,  2,  6,  1, 15,  0, 10, 14,  9,
+               11, 12, 16, 21, 17, 19,  3, 26, 13, 29, 27, 23, 28, 25])
+
 for t in timeSteps:
+    names = ['DE', 'FR', 'GB', 'IT', 'ES', 'SE', 'PL', 'NO', 'NL',
+                      'BE', 'FI', 'CZ', 'AT', 'GR', 'RO', 'BG', 'PT', 'CH',
+                      'HU', 'DK', 'RS', 'IE', 'BA', 'SK', 'HR', 'LT', 'EE',
+                      'SI', 'LV', 'LU']
     t = int(t)
     # Load power mixes from up/down stream approach
     phi = np.load('./data/phi.npy')
@@ -46,16 +49,21 @@ for t in timeSteps:
     # compare power mixes from the two approaches
     # if node is a sink compare imports, if node is a source compare exports
     corr = np.zeros((nodes, len(fractions)))
-    for n in range(nodes):
-        if phi[n,t] > 0:
-            for i in range(len(fractions)):
-                corr[n,i] = pearsonr(pmex[n], powerMix[i,:,n])[0]
-        if phi[n,t] < 0:
-            for i in range(len(fractions)):
-                corr[n,i] = pearsonr(pmim[n], powerMix[i,n,:])[0]
+    newNames = names
+    for n in order:
         if round(phi[n,t],4) == 0:
+            newNames[n] = names[n]
             for i in range(len(fractions)):
                 corr[n,i] = 0
+        if round(phi[n,t],4) > 0:
+            newNames[n] = '+ '+names[n]
+            for i in range(len(fractions)):
+                corr[n,i] = pearsonr(pmex[n], powerMix[i,:,n])[0]
+        if round(phi[n,t],4) < 0:
+            newNames[n] = '- '+names[n]
+            for i in range(len(fractions)):
+                corr[n,i] = pearsonr(pmim[n], powerMix[i,n,:])[0]
+
 
     plt.figure()
     ax = plt.subplot()
@@ -64,6 +72,6 @@ for t in timeSteps:
     ax.set_xticks(np.linspace(.5,9.5,10))
     ax.set_xticklabels(np.linspace(.1,1,10))
     ax.set_yticks(np.linspace(.5,29.5,30))
-    ax.set_yticklabels(names,ha="right",va="center",fontsize=8)
+    ax.set_yticklabels(newNames,ha="right",va="center",fontsize=8)
     plt.xlabel('fraction')
     plt.savefig('./figures/power_corr/t_'+str(t)+'.png', bbox_inches='tight')

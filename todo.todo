@@ -12,7 +12,8 @@ Diffusive iterator TODO:
         ✔ introduce the lambda parameter so sinks will only get a fraction of what is available @done(2015-02-17 13:20) @project(Fractional sinks)
 
     Plotting:
-        ☐ sort nodes after mean load and mark sources and sinks for given time step
+        ☐ sort nodes after node degree
+        ✔ sort nodes after mean load and mark sources and sinks for given time step @done(2015-02-20 23:01) @project(Plotting)
         ✔ Compare node power mix of diffusive flow with up/downstream approach @done(2015-02-16 12:07) @project(Plotting)
         ✔ Compare link power mix of diffusive flow with up/downstream approach @done(2015-02-16 13:26) @project(Plotting)
         ✔ Compare power mixes as function of fractional sinks @done(2015-02-19 15:36) @project(Plotting)
