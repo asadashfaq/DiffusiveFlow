@@ -1,20 +1,11 @@
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
+from functions import norm
 
 """
 Plotting comparison of diffusive flow and up/down stream approach
 """
-
-def norm(v):
-    """
-    Normalise input vector.
-    """
-    if sum(v) != 0:
-        return v/sum(v)
-    else:
-        print('Sum of vector equals zero. Returning un-normalised vector')
-        return v
 
 names = ['AT', 'FI', 'NL', 'BA', 'FR', 'NO', 'BE', 'GB', 'PL', 'BG', 'GR',\
          'PT', 'CH', 'HR', 'RO', 'CZ', 'HU', 'RS', 'DE', 'IE', 'SE', 'DK',\
