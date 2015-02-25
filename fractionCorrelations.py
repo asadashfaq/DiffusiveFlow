@@ -122,3 +122,4 @@ if 'plot' in task:
         ax.set_yticklabels(newNames,ha="right",va="center",fontsize=8)
         plt.xlabel('fraction')
         plt.savefig('./figures/fraction correlation/t_'+str(t)+title+'.png', bbox_inches='tight')
+        plt.close('all')
