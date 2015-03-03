@@ -54,33 +54,26 @@ degreeNames = np.array(['DE', 'AT', 'FR', 'IT', 'SE', 'RS', 'HU', 'HR', 'NL',
                         'SK', 'LV', 'GR', 'ES', 'BE', 'BA', 'EE', 'FI', 'IE',
                         'PT', 'LU', 'LT'], dtype='|S4')
 
-if 'load' in task:
-    order = loadOrder
-    names = loadNames
-    title = '-load'
-elif 'degree' in task:
-    order = degreeOrder
-    names = degreeNames
-    title = '-degree'
-else:
-    order = range(30)
-    names = names
-    title = ''
-
 if 'plot' in task:
     phi = np.load('./data/phi.npy')
     # Load power mixes from up/down stream approach
     upDownPowerMix = np.load('./input/linear_pm.npz', mmap_mode='r')
-    for t in timeSteps:
+    # settings for figures
+    titles = ['', '-load', '-degree']
+    orders = [range(30), loadOrder, degreeOrder]
+    nameList = [names, loadNames, degreeNames]
+    norm = mpl.colors.Normalize(vmin=0, vmax=1)
+
+    for t in [288]:
         t = int(t)
         pmex = upDownPowerMix['power_mix_ex'][:, :, t]
         pmim = upDownPowerMix['power_mix'][:, :, t]
 
         # Remove self import/export from up/down stream approach
         for n in range(nodes):
-            if phi[n, t] > 0:
+            if round(phi[n, t], 0) > 0:
                 pmim[n, n] = 0
-            if phi[n, t] < 0:
+            if round(phi[n, t], 0) < 0:
                 pmex[n, n] = 0
 
         # Load power mixes from diffusive iterator
@@ -105,29 +98,35 @@ if 'plot' in task:
         corr = np.zeros((nodes, len(fractions)))
         newNames = np.copy(names)
         for n in range(nodes):
-            if round(phi[order[n], t], 4) == 0:
+            if round(phi[n, t], 0) == 0:
                 newNames[n] = names[n]
                 for i in range(len(fractions)):
                     corr[n, i] = 0
-            if round(phi[order[n], t], 4) > 0:
+            if round(phi[n, t], 0) > 0:
                 newNames[n] = '+ ' + names[n]
                 for i in range(len(fractions)):
-                    corr[n, i] = pearsonr(pmex[order[n]], powerMix[i, :, order[n]])[0]
-            if round(phi[order[n], t], 4) < 0:
+                    corr[n, i] = pearsonr(pmex[n], powerMix[i, :, n])[0]
+            if round(phi[n, t], 0) < 0:
                 newNames[n] = '- ' + names[n]
                 for i in range(len(fractions)):
-                    corr[n, i] = pearsonr(pmim[order[n]], powerMix[i, order[n], :])[0]
-        plt.figure()
-        ax = plt.subplot()
-        plt.pcolormesh(corr)
-        plt.colorbar()
-        ax.set_xticks(np.linspace(.5, 9.5, 10))
-        ax.set_xticklabels(np.linspace(.1, 1, 10))
-        ax.set_yticks(np.linspace(.5, 29.5, 30))
-        ax.set_yticklabels(newNames, ha="right", va="center", fontsize=8)
-        plt.xlabel('fraction')
-        plt.savefig('./figures/fraction correlation/t_' + str(t) + title + '.png', bbox_inches='tight')
-        plt.close()
+                    corr[n, i] = pearsonr(pmim[n], powerMix[i, n, :])[0]
+
+        for m in range(3):
+            title = titles[m]
+            order = orders[m]
+            names = nameList[m]
+
+            plt.figure()
+            ax = plt.subplot()
+            plt.pcolormesh(corr[order], norm=norm)
+            plt.colorbar()
+            ax.set_xticks(np.linspace(.5, 9.5, 10))
+            ax.set_xticklabels(np.linspace(.1, 1, 10))
+            ax.set_yticks(np.linspace(.5, 29.5, 30))
+            ax.set_yticklabels(newNames[order], ha="right", va="center", fontsize=8)
+            plt.xlabel('fraction')
+            plt.savefig('./figures/fraction correlation/t_' + str(t) + title + '.png', bbox_inches='tight')
+            plt.close()
 
 if 'avg' in task:
     try:
@@ -146,9 +145,9 @@ if 'avg' in task:
 
         # Remove self import/export from up/down stream approach
         for n in range(nodes):
-            if phi[n, t] > 0:
+            if round(phi[n, t], 0) > 0:
                 pmim[n, n] = 0
-            if phi[n, t] < 0:
+            if round(phi[n, t], 0) < 0:
                 pmex[n, n] = 0
 
         # Load power mixes from diffusive iterator
@@ -163,13 +162,13 @@ if 'avg' in task:
         # if node is a sink compare imports, if node is a source compare exports
         corr = np.zeros((nodes, len(fractions)))
         for n in range(nodes):
-            if round(phi[order[n], t], 4) == 0: continue
-            if round(phi[order[n], t], 4) > 0:
+            if round(phi[n, t], 0) == 0: continue
+            if round(phi[n, t], 0) > 0:
                 for i in range(len(fractions)):
-                    exportCorr[n, i] += pearsonr(pmex[order[n]], powerMix[i, :, order[n]])[0]
-            if round(phi[order[n], t], 4) < 0:
+                    exportCorr[n, i] += pearsonr(pmex[n], powerMix[i, :, n])[0]
+            if round(phi[n, t], 0) < 0:
                 for i in range(len(fractions)):
-                    importCorr[n, i] += pearsonr(pmim[order[n]], powerMix[i, order[n], :])[0]
+                    importCorr[n, i] += pearsonr(pmim[n], powerMix[i, n, :])[0]
 
     # average correlations for each fraction over all time steps
     exportCorr = exportCorr / len(timeSteps)
