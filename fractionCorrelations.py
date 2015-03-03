@@ -174,22 +174,30 @@ if 'avg' in task:
     importCorr = importCorr / len(timeSteps)
 
     # plot import and export side by side and sort in 3 different ways
-    plt.figure(figsize=(12, 6))
-    ax = plt.subplot(121)
-    plt.pcolormesh(exportCorr)
-    plt.colorbar()
-    ax.set_xticks(np.linspace(.5, 9.5, 10))
-    ax.set_xticklabels(np.linspace(.1, 1, 10))
-    ax.set_yticks(np.linspace(.5, 29.5, 30))
-    ax.set_yticklabels(names, ha="right", va="center", fontsize=8)
-    plt.xlabel('fraction')
+    titles = ['', '-load', '-degree']
+    orders = [range(30), loadOrder, degreeOrder]
+    nameList = [names, loadNames, degreeNames]
+    for m in range(3):
+        title = titles[m]
+        order = orders[m]
+        names = nameList[m]
 
-    ax = plt.subplot(122)
-    plt.pcolormesh(importCorr)
-    plt.colorbar()
-    ax.set_xticks(np.linspace(.5, 9.5, 10))
-    ax.set_xticklabels(np.linspace(.1, 1, 10))
-    ax.set_yticks(np.linspace(.5, 29.5, 30))
-    ax.set_yticklabels(names, ha="right", va="center", fontsize=8)
-    plt.xlabel('fraction')
-    plt.savefig('./figures/year/power_mix_correlation-' + str(len(timeSteps)) + title + '.png', bbox_inches='tight')
+        plt.figure(figsize=(12, 6))
+        ax = plt.subplot(121)
+        plt.pcolormesh(exportCorr[order])
+        plt.colorbar()
+        ax.set_xticks(np.linspace(.5, 9.5, 10))
+        ax.set_xticklabels(np.linspace(.1, 1, 10))
+        ax.set_yticks(np.linspace(.5, 29.5, 30))
+        ax.set_yticklabels(names, ha="right", va="center", fontsize=8)
+        plt.xlabel('fraction')
+
+        ax = plt.subplot(122)
+        plt.pcolormesh(importCorr[order])
+        plt.colorbar()
+        ax.set_xticks(np.linspace(.5, 9.5, 10))
+        ax.set_xticklabels(np.linspace(.1, 1, 10))
+        ax.set_yticks(np.linspace(.5, 29.5, 30))
+        ax.set_yticklabels(names, ha="right", va="center", fontsize=8)
+        plt.xlabel('fraction')
+        plt.savefig('./figures/year/power_mix_correlation-' + str(len(timeSteps)) + title + '.png', bbox_inches='tight')
