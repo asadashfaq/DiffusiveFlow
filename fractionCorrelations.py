@@ -3,6 +3,7 @@ import sys
 import numpy as np
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 """
 Investigating correlation of power mixes between diffusive flow and up/down
@@ -12,6 +13,7 @@ Ways of calling:
 plot:   plot color mesh of correlation of power mixes for different fractions
 avg:    same as above but averaged over a specified number of hours. Include
         number of hours as second command line argument. See examples below.
+link:   same as 'plot' but for links
 
 example:
 python fractionCorrelation.py plot load
@@ -177,6 +179,7 @@ if 'avg' in task:
     titles = ['', '-load', '-degree']
     orders = [range(30), loadOrder, degreeOrder]
     nameList = [names, loadNames, degreeNames]
+    norm = mpl.colors.Normalize(vmin=0, vmax=1)
     for m in range(3):
         title = titles[m]
         order = orders[m]
@@ -184,20 +187,22 @@ if 'avg' in task:
 
         plt.figure(figsize=(12, 6))
         ax = plt.subplot(121)
-        plt.pcolormesh(exportCorr[order])
+        plt.pcolormesh(exportCorr[order], norm=norm)
         plt.colorbar()
         ax.set_xticks(np.linspace(.5, 9.5, 10))
         ax.set_xticklabels(np.linspace(.1, 1, 10))
         ax.set_yticks(np.linspace(.5, 29.5, 30))
         ax.set_yticklabels(names, ha="right", va="center", fontsize=8)
         plt.xlabel('fraction')
+        plt.title('Export color mix')
 
         ax = plt.subplot(122)
-        plt.pcolormesh(importCorr[order])
+        plt.pcolormesh(importCorr[order], norm=norm)
         plt.colorbar()
         ax.set_xticks(np.linspace(.5, 9.5, 10))
         ax.set_xticklabels(np.linspace(.1, 1, 10))
         ax.set_yticks(np.linspace(.5, 29.5, 30))
         ax.set_yticklabels(names, ha="right", va="center", fontsize=8)
         plt.xlabel('fraction')
-        plt.savefig('./figures/year/power_mix_correlation-' + str(len(timeSteps)) + title + '.png', bbox_inches='tight')
+        plt.title('Import color mix')
+        plt.savefig('./figures/avg/power_mix_correlation-' + str(len(timeSteps)) + title + '.png', bbox_inches='tight')
