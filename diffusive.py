@@ -6,6 +6,7 @@ from functions import nodeDegree, norm
 Diffusive iterator to solve and trace power flow
 """
 
+
 def diffusiveIterator(A, K, phi, timeStep, frac=1, direction='export', limit=False, objective=False):
     """
     A:          adjacency matrix
@@ -30,15 +31,15 @@ def diffusiveIterator(A, K, phi, timeStep, frac=1, direction='export', limit=Fal
 
     nodes = A.shape[0]
     degrees = nodeDegree(A, range(nodes))
-    links = len(np.where(A)[0])/2
+    links = len(np.where(A)[0]) / 2
 
     # pp: positive part of injection pattern
     # pn: negative part of injection pattern
     pp, pn = np.zeros((nodes, nodes)), np.zeros((nodes, nodes))
 
     for i, p in enumerate(phi[:, timeStep]):
-        if p > 0: pp[i,i] = p
-        if p < 0: pn[i,i] = p
+        if p > 0: pp[i, i] = p
+        if p < 0: pn[i, i] = p
     initPower = sum(sum(pp))
 
     # Adjacency matrix scaled with node degrees. Column i is divided by the
@@ -55,11 +56,11 @@ def diffusiveIterator(A, K, phi, timeStep, frac=1, direction='export', limit=Fal
         iteration += 1
         R = np.zeros((nodes, nodes))
         for i in range(nodes):
-            R += np.array(np.dot(np.reshape(Amod[:,i], (nodes,1)), np.reshape(pp[i], (1, nodes))))
+            R += np.array(np.dot(np.reshape(Amod[:, i], (nodes, 1)), np.reshape(pp[i], (1, nodes))))
 
         # update colors and link flows
         for n in range(nodes):
-            linkFlow[n, :, :] += np.outer(K[n], pp[n]/degrees[n])
+            linkFlow[n, :, :] += np.outer(K[n], pp[n] / degrees[n])
 
         # compare R with P-, update P-, P+
         pp = np.zeros((nodes, nodes))
@@ -67,18 +68,18 @@ def diffusiveIterator(A, K, phi, timeStep, frac=1, direction='export', limit=Fal
             if np.round(sum(pn[i]), 6) == 0:
                 pp[i] = p
             if np.round(sum(pn[i]), 6) < 0:
-                pn[i] += frac*p
-                pp[i] += (1-frac)*p
+                pn[i] += frac * p
+                pp[i] += (1 - frac) * p
             if np.round(sum(pn[i]), 6) > 0:
-                sinkStrength = pn[i,i]
+                sinkStrength = pn[i, i]
                 sourceStrength = sum(pn[i])
-                pn[i,i] = 0
-                pn[i] = norm(pn[i])*abs(sinkStrength)
-                pn[i,i] = sinkStrength
-                pp[i] += norm(p)*sourceStrength
+                pn[i, i] = 0
+                pn[i] = norm(pn[i]) * abs(sinkStrength)
+                pn[i, i] = sinkStrength
+                pp[i] += norm(p) * sourceStrength
 
         # check convergence
-        powerFrac = sum(sum(pp))/initPower*100
+        powerFrac = sum(sum(pp)) / initPower * 100
         if limit:
             if iteration == limit: iterate = False
         if objective:
