@@ -1,5 +1,6 @@
 from __future__ import division
 import sys
+import math
 import numpy as np
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
@@ -30,6 +31,7 @@ else:
 nodes = 30
 fractions = np.linspace(.1, 1, 10)
 timeSteps = np.load('./results/fraction/timeSteps.npy')
+rr = 3  # rounding of power mixes, number of decimal places
 
 names = np.array(['AT', 'FI', 'NL', 'BA', 'FR', 'NO', 'BE', 'GB', 'PL', 'BG',
                   'GR', 'PT', 'CH', 'HR', 'RO', 'CZ', 'HU', 'RS', 'DE', 'IE',
@@ -64,16 +66,16 @@ if 'plot' in task:
     nameList = [names, loadNames, degreeNames]
     norm = mpl.colors.Normalize(vmin=0, vmax=1)
 
-    for t in [288]:
+    for t in timeSteps:
         t = int(t)
         pmex = upDownPowerMix['power_mix_ex'][:, :, t]
         pmim = upDownPowerMix['power_mix'][:, :, t]
 
         # Remove self import/export from up/down stream approach
         for n in range(nodes):
-            if round(phi[n, t], 0) > 0:
+            if round(phi[n, t], rr) > 0:
                 pmim[n, n] = 0
-            if round(phi[n, t], 0) < 0:
+            if round(phi[n, t], rr) < 0:
                 pmex[n, n] = 0
 
         # Load power mixes from diffusive iterator
@@ -98,18 +100,26 @@ if 'plot' in task:
         corr = np.zeros((nodes, len(fractions)))
         newNames = np.copy(names)
         for n in range(nodes):
-            if round(phi[n, t], 0) == 0:
+            if round(phi[n, t], rr) == 0:
                 newNames[n] = names[n]
                 for i in range(len(fractions)):
                     corr[n, i] = 0
-            if round(phi[n, t], 0) > 0:
+            if round(phi[n, t], rr) > 0:
                 newNames[n] = '+ ' + names[n]
                 for i in range(len(fractions)):
-                    corr[n, i] = pearsonr(pmex[n], powerMix[i, :, n])[0]
-            if round(phi[n, t], 0) < 0:
+                    tempCorr = pearsonr(pmex[n], powerMix[i, :, n])[0]
+                    if math.isnan(tempCorr):
+                        corr[n, i] = 0
+                    else:
+                        corr[n, i] = tempCorr
+            if round(phi[n, t], rr) < 0:
                 newNames[n] = '- ' + names[n]
                 for i in range(len(fractions)):
-                    corr[n, i] = pearsonr(pmim[n], powerMix[i, n, :])[0]
+                    tempCorr = pearsonr(pmim[n], powerMix[i, n, :])[0]
+                    if math.isnan(tempCorr):
+                        corr[n, i] = 0
+                    else:
+                        corr[n, i] = tempCorr
 
         for m in range(3):
             title = titles[m]
@@ -129,9 +139,12 @@ if 'plot' in task:
             plt.close()
 
 if 'avg' in task:
-    try:
-        hours = int(sys.argv[2])
-    except ValueError:
+    if len(sys.argv) > 2:
+        try:
+            hours = int(sys.argv[2])
+        except ValueError:
+            raise ValueError('Input number of hours to include as second command line argument')
+    else:
         raise ValueError('Input number of hours to include as second command line argument')
     importCorr = np.zeros((nodes, len(fractions)))
     exportCorr = np.zeros((nodes, len(fractions)))
@@ -145,9 +158,9 @@ if 'avg' in task:
 
         # Remove self import/export from up/down stream approach
         for n in range(nodes):
-            if round(phi[n, t], 0) > 0:
+            if round(phi[n, t], rr) > 0:
                 pmim[n, n] = 0
-            if round(phi[n, t], 0) < 0:
+            if round(phi[n, t], rr) < 0:
                 pmex[n, n] = 0
 
         # Load power mixes from diffusive iterator
@@ -162,13 +175,17 @@ if 'avg' in task:
         # if node is a sink compare imports, if node is a source compare exports
         corr = np.zeros((nodes, len(fractions)))
         for n in range(nodes):
-            if round(phi[n, t], 0) == 0: continue
-            if round(phi[n, t], 0) > 0:
+            if round(phi[n, t], rr) == 0: continue
+            if round(phi[n, t], rr) > 0:
                 for i in range(len(fractions)):
-                    exportCorr[n, i] += pearsonr(pmex[n], powerMix[i, :, n])[0]
-            if round(phi[n, t], 0) < 0:
+                    tempCorr = pearsonr(pmex[n], powerMix[i, :, n])[0]
+                    if not math.isnan(tempCorr):
+                        exportCorr[n, i] += tempCorr
+            if round(phi[n, t], rr) < 0:
                 for i in range(len(fractions)):
-                    importCorr[n, i] += pearsonr(pmim[n], powerMix[i, n, :])[0]
+                    tempCorr = pearsonr(pmim[n], powerMix[i, n, :])[0]
+                    if not math.isnan(tempCorr):
+                        importCorr[n, i] += tempCorr
 
     # average correlations for each fraction over all time steps
     exportCorr = exportCorr / len(timeSteps)
