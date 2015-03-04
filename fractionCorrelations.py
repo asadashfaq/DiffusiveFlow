@@ -17,8 +17,12 @@ avg:    same as above but averaged over a specified number of hours. Include
 link:   same as 'plot' but for links
 
 example:
-python fractionCorrelation.py plot load
-python fractionCorrelation.py avg 100 load
+python fractionCorrelation.py plot
+python fractionCorrelation.py avg 100
+
+'plot' can be called with an integer as an optional argument, so it only plots
+figures for that particular time step. Example:
+python fractionCorrelation.py plot 10
 """
 
 """
@@ -57,6 +61,12 @@ degreeNames = np.array(['DE', 'AT', 'FR', 'IT', 'SE', 'RS', 'HU', 'HR', 'NL',
                         'PT', 'LU', 'LT'], dtype='|S4')
 
 if 'plot' in task:
+    if len(sys.argv) > 2:
+        try:
+            timeSteps = [int(sys.argv[2])]
+        except ValueError:
+            timeSteps = timeSteps
+            print 'y'
     phi = np.load('./data/phi.npy')
     # Load power mixes from up/down stream approach
     upDownPowerMix = np.load('./input/linear_pm.npz', mmap_mode='r')
