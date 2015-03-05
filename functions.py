@@ -30,7 +30,7 @@ def norm(v):
         return v
 
 
-def iterationStats(timeSteps, limit=None, fraction=False):
+def iterationStats(timeSteps, limit=None, fraction=False, save=False):
     """
     Calculate stats for selected time steps
     timeSteps:  input integer or list
@@ -65,6 +65,8 @@ def iterationStats(timeSteps, limit=None, fraction=False):
             iteration[i] = d['i']
             initPower[i] = d['initPower']
             powerFrac[i] = d['powerFrac']
+        if save:
+            np.savez('./results/stats_' + str(int(len(timeSteps))) + '.npz', iteration=iteration, initPower=initPower, powerFrac=powerFrac)
         if len(timeSteps) > 1:
             print 'Time step: ', str(timeSteps[0]) + ':' + str(timeSteps[-1])
         else:
