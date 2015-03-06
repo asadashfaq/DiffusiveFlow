@@ -66,7 +66,6 @@ if 'plot' in task:
             timeSteps = [int(sys.argv[2])]
         except ValueError:
             timeSteps = timeSteps
-            print 'y'
     phi = np.load('./data/phi.npy')
     # Load power mixes from up/down stream approach
     upDownPowerMix = np.load('./input/linear_pm.npz', mmap_mode='r')
