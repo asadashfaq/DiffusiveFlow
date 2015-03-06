@@ -49,9 +49,14 @@ def diffusiveIterator(A, K, phi, timeStep, frac=1, direction='export', limit=Fal
     # Prepare vectors for saving flow
     linkFlow = np.zeros((nodes, links, nodes))
 
-    # ITERATE
-    iterate = True
+    # Iterate if more than 1W is injected in total
     iteration = 0
+    if initPower < 1:
+        iterate = False
+        powerFrac = 0
+    else:
+        iterate = True
+
     while(iterate):
         iteration += 1
         R = np.zeros((nodes, nodes))
@@ -65,12 +70,12 @@ def diffusiveIterator(A, K, phi, timeStep, frac=1, direction='export', limit=Fal
         # compare R with P-, update P-, P+
         pp = np.zeros((nodes, nodes))
         for i, p in enumerate(R):
-            if np.round(sum(pn[i]), 6) == 0:
+            if np.round(sum(pn[i]), 3) == 0:
                 pp[i] = p
-            if np.round(sum(pn[i]), 6) < 0:
+            if np.round(sum(pn[i]), 3) < 0:
                 pn[i] += frac * p
                 pp[i] += (1 - frac) * p
-            if np.round(sum(pn[i]), 6) > 0:
+            if np.round(sum(pn[i]), 3) > 0:
                 sinkStrength = pn[i, i]
                 sourceStrength = sum(pn[i])
                 pn[i, i] = 0
