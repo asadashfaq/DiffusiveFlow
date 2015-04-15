@@ -1,4 +1,5 @@
 from __future__ import division
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from functions import norm
@@ -136,3 +137,69 @@ def plotUsage(t=100, consistency=False):
 
         plt.suptitle(names[n] + " (" + str(int(round(phi[n, t]))) + "), t = " + str(t), fontsize=14)
         plt.savefig('./figures/usage/' + str(n) + '.png', bbox_inches='tight')
+
+
+def plotFraction(n, t, f):
+    """
+    Function to plot power mix for a given node, hour and fraction
+    """
+    phi = np.load('./data/phi.npy')
+    data = np.load('./results/fraction/t_' + str(t) + '_f_' + str(f) + '_o_0.1.npz')
+    pm = data['powerMix']
+    np.fill_diagonal(pm, 0)
+    nodes = pm.shape[0]
+
+    if phi[n, t] > 0:
+        pm = pm[:, n]
+        direction = 'export'
+    elif phi[n, t] < 0:
+        pm = pm[n, :]
+        direction = 'import'
+
+    plt.figure(figsize=(13, 6))
+    ax = plt.subplot()
+    plt.bar(range(nodes), pm, edgecolor='none', color='SteelBlue')
+    plt.xticks(np.linspace(.4, 29.4, 30), names, rotation=75, fontsize=10)
+    ax.xaxis.set_tick_params(width=0)
+    plt.title(names[n] + ' ' + direction + ' t=' + str(t), fontsize=12)
+    plt.ylabel('MW')
+    plt.ylim(ymin=0)
+    plt.savefig('./figures/fraction/n_' + str(n) + '_t_' + str(t) + '_f_' + str(f) + '.png', bbox_inches='tight')
+
+
+def plotFractions(n, t):
+    """
+    Function to plot power mix for a given node and hour accross fractions
+    """
+    phi = np.load('./data/phi.npy')
+    nodes = phi.shape[0]
+
+    nodePath = './figures/fractions/' + names[n]
+    if not os.path.exists(nodePath):
+        os.makedirs(nodePath)
+
+    fractions = np.linspace(0.1, 1.0, 10)
+    mixes = np.zeros((10, nodes))
+    for i, f in enumerate(fractions):
+        pm = np.load('./results/fraction/t_' + str(t) + '_f_' + str(f) + '_o_0.1.npz')['powerMix']
+        np.fill_diagonal(pm, 0)
+
+        if phi[n, t] > 0:
+            mixes[i] = pm[:, n]
+            direction = 'export'
+        elif phi[n, t] < 0:
+            mixes[i] = pm[n, :]
+            direction = 'import'
+
+    plt.figure(figsize=(10, 4))
+    ax = plt.subplot()
+    plt.pcolormesh(mixes, cmap='Blues')
+    plt.colorbar().set_label(label=r'MW', size=10)
+    plt.yticks(np.linspace(.5, 9.5, 10), fractions)
+    plt.xticks(np.linspace(.5, 29.5, 30), names, rotation=75, fontsize=10)
+    ax.xaxis.set_tick_params(width=0)
+    ax.yaxis.set_tick_params(width=0)
+    plt.ylabel('fractions')
+    plt.title(names[n] + ' ' + direction + ' t=' + str(t), fontsize=13)
+    plt.savefig(nodePath + '/' + 't_' + str(t) + '.png', bbox_inches='tight')
+    plt.close()
