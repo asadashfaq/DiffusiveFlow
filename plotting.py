@@ -65,7 +65,53 @@ def plotNodes(t=100, consistency=False):
         plt.ylim(ymin=0)
 
         plt.suptitle(names[n] + " (" + str(int(round(phi[n, t]))) + "), t = " + str(t), fontsize=14)
-        plt.savefig('./figures/nodes/' + str(n) + '.png', bbox_inches='tight')
+        plt.savefig('./figures/nodes/' + str(n) + '_t_' + str(t) + '.png', bbox_inches='tight')
+        plt.close()
+
+
+def plotNodesSingle(t=100, consistency=False):
+    """
+    Function that plots nodes' power mixes to compare diffusive flow to up/down
+    stream approach.
+    """
+    phi = np.load('./data/phi.npy')
+    pmim = np.load('./results/power_mix_node_import_100.npy')
+    pmex = np.load('./results/power_mix_node_export_100.npy')
+    dpm = np.load('./results/dpm_export.npy')
+    np.fill_diagonal(dpm, 0)
+    nodes = pmim.shape[0]
+
+    for n in range(nodes):
+        if phi[n, t] > 0:
+            pmim[n, n] = 0
+            if consistency: print ' +  , ', sum(dpm[:, n]) - phi[n, t]
+            pmex[n, :] = pmex[n, :] / sum(pmex[n, :]) * phi[n, t]
+            plt.figure(figsize=(7, 6))
+            plt.bar(range(nodes), dpm[:, n], width, edgecolor='none', color='SteelBlue')
+            plt.bar(np.arange(shift, nodes + shift, 1), pmex[n, :], width, edgecolor='none', color='LightSteelBlue')
+            plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=10)
+            plt.legend(('Diffusive flow', 'Up/down stream'), loc='best')
+            plt.title('Export', fontsize=12)
+            plt.ylabel('MW')
+            plt.ylim(ymin=0)
+            plt.title(names[n] + " (" + str(int(round(phi[n, t]))) + "), t = " + str(t), fontsize=14)
+
+        if phi[n, t] < 0:
+            pmex[n, n] = 0
+            if consistency: print '- , ', sum(dpm[n, :]) + phi[n, t]
+            pmim[n, :] = pmim[n, :] / sum(pmim[n, :]) * abs(phi[n, t])
+            plt.figure(figsize=(7, 6))
+            plt.bar(range(nodes), dpm[n, :], width, edgecolor='none', color='SteelBlue')
+            plt.bar(np.arange(shift, nodes + shift, 1), pmim[n, :], width, edgecolor='none', color='LightSteelBlue')
+            plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=10)
+            plt.legend(('Diffusive flow', 'Up/down stream'), loc='best')
+            plt.title('Import', fontsize=12)
+            plt.ylabel('MW')
+            plt.ylim(ymin=0)
+            plt.title(names[n] + " (" + str(int(round(phi[n, t]))) + "), t = " + str(t), fontsize=14)
+
+        plt.savefig('./figures/nodes/' + str(n) + '_t_' + str(t) + '_single.png', bbox_inches='tight')
+        plt.close()
 
 
 def plotLinks():
