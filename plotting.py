@@ -54,6 +54,7 @@ def plotNodes(t=100, consistency=False):
         plt.title('Import', fontsize=12)
         plt.ylabel('MW')
         plt.ylim(ymin=0)
+        plt.grid(True)
 
         plt.subplot(1, 2, 2)
         plt.bar(range(nodes), dpm[:, n], width, edgecolor='none', color='SteelBlue')
@@ -63,9 +64,10 @@ def plotNodes(t=100, consistency=False):
         plt.title('Export', fontsize=12)
         plt.ylabel('MW')
         plt.ylim(ymin=0)
+        plt.grid(True)
 
         plt.suptitle(names[n] + " (" + str(int(round(phi[n, t]))) + "), t = " + str(t), fontsize=14)
-        plt.savefig('./figures/nodes/' + str(n) + '_t_' + str(t) + '.png', bbox_inches='tight')
+        plt.savefig('./figures/nodes/n_' + str(n) + '_t_' + str(t) + '.png', bbox_inches='tight')
         plt.close()
 
 
@@ -105,39 +107,41 @@ def plotNodesSingle(t=100, consistency=False):
         plt.ylabel('MW')
         plt.ylim(ymin=0)
         plt.legend(('Diffusive flow', 'Up/down stream'), loc='best')
-        plt.savefig('./figures/nodes/' + str(n) + '_t_' + str(t) + '_single.png', bbox_inches='tight')
+        plt.savefig('./figures/nodes/n_' + str(n) + '_t_' + str(t) + '_single.png', bbox_inches='tight')
         plt.close()
 
 
-def plotLinks():
-    LinkExport = np.load('./input/link_export_100_linear.npy')
-    LinkImport = np.load('./input/link_import_100_linear.npy')
+def plotLinks(t=100):
+    LinkExport = np.load('./input/link_mix_export.npy', mmap_mode='r')[:, :, t]
+    LinkImport = np.load('./input/link_mix_import.npy', mmap_mode='r')[:, :, t]
+    linkFlow = np.load('./input/linear-flows.npy')[:, t]
+    direction = linkFlow / np.abs(linkFlow)
     linkFlowEx = np.load('./results/linkFlow_export.npy')
     linkFlowIm = np.load('./results/linkFlow_import.npy')
     linkFlowEx = np.sum(linkFlowEx, 0)
     linkFlowIm = np.sum(linkFlowIm, 0)
     nodes = linkFlowEx.shape[1]
     for l in range(len(LinkExport)):
-        plt.figure(figsize=(13, 6))
+        plt.figure(figsize=(11, 4))
         plt.subplot(1, 2, 1)
         b = plt.bar(np.arange(0, nodes), linkFlowEx[l, :], width, edgecolor='none', color='SteelBlue')
-        c = plt.bar(np.arange(shift, nodes + shift, 1), LinkExport[l, :], width, edgecolor='none', color='LightSteelBlue')
+        c = plt.bar(np.arange(shift, nodes + shift, 1), LinkExport[l, :] * direction[l], width, edgecolor='none', color='LightSteelBlue')
         plt.title(linkNames[l] + ' export flow')
         plt.ylabel('MW')
         plt.grid(True)
-        plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=10)
-        plt.legend((b, c), ('Diffusive flow', 'Up/down stream'), loc='best')
+        plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=9)
 
         plt.subplot(1, 2, 2)
         b = plt.bar(np.arange(0, nodes), linkFlowIm[l, :], width, edgecolor='none', color='SteelBlue')
-        c = plt.bar(np.arange(shift, nodes + shift, 1), LinkImport[l, :], width, edgecolor='none', color='LightSteelBlue')
+        c = plt.bar(np.arange(shift, nodes + shift, 1), LinkImport[l, :] * direction[l], width, edgecolor='none', color='LightSteelBlue')
         plt.title(linkNames[l] + ' import flow')
         plt.ylabel('MW')
         plt.grid(True)
-        plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=10)
-        plt.legend((b, c), ('Diffusive flow', 'Up/down stream'), loc='best')
+        plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=9)
+        plt.legend((b, c), ('Diffusive flow', 'Up/down stream'), bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize=10)
 
-        plt.savefig('./figures/links/' + str(l) + '.png', bbox_inches='tight')
+        plt.savefig('./figures/links/l_' + str(l) + '_t_' + str(t) + '.png', bbox_inches='tight')
+        plt.close()
 
 
 def plotUsage(t=100, consistency=False):
@@ -171,7 +175,7 @@ def plotUsage(t=100, consistency=False):
         plt.grid(True)
         plt.ylim(ymin=0)
         plt.title(names[n] + " (" + str(int(round(phi[n, t]))) + "), t = " + str(t), fontsize=14)
-        plt.legend(('Diffusive flow', 'Up- down stream'), loc='best')
+        plt.legend(('Diffusive flow', 'Up- down stream'), loc='best', fontsize=10)
         plt.savefig('./figures/usage/' + str(n) + '_t_' + str(t) + '.png', bbox_inches='tight')
         plt.close()
 
