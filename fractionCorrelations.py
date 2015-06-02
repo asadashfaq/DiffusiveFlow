@@ -137,7 +137,7 @@ if 'plot' in task:
 
             plt.figure()
             ax = plt.subplot()
-            plt.pcolormesh(corr[order], norm=norm)
+            plt.pcolormesh(corr[order], norm=norm, cmap='Blues')
             plt.colorbar()
             ax.set_xticks(np.linspace(.5, 9.5, 10))
             ax.set_xticklabels(np.linspace(.1, 1, 10))
@@ -160,6 +160,8 @@ if 'avg' in task:
     phi = np.load('./data/phi.npy')
     upDownPowerMix = np.load('./input/linear_pm.npz', mmap_mode='r')
     timeSteps = range(hours)
+    corrTimesIm = np.zeros((nodes, len(fractions)))
+    corrTimesEx = np.zeros((nodes, len(fractions)))
     for t in timeSteps:
         t = int(t)
         pmex = upDownPowerMix['power_mix_ex'][:, :, t]
@@ -190,15 +192,19 @@ if 'avg' in task:
                     tempCorr = pearsonr(pmex[n], powerMix[i, :, n])[0]
                     if not math.isnan(tempCorr):
                         exportCorr[n, i] += tempCorr
+                        corrTimesEx[n, i] += 1
             if round(phi[n, t], rr) < 0:
                 for i in range(len(fractions)):
                     tempCorr = pearsonr(pmim[n], powerMix[i, n, :])[0]
                     if not math.isnan(tempCorr):
                         importCorr[n, i] += tempCorr
+                        corrTimesIm[n, i] += 1
 
     # average correlations for each fraction over all time steps
-    exportCorr = exportCorr / len(timeSteps)
-    importCorr = importCorr / len(timeSteps)
+    corrTimesIm[np.where(corrTimesIm == 0)] = 1
+    corrTimesEx[np.where(corrTimesEx == 0)] = 1
+    exportCorr = exportCorr / corrTimesEx
+    importCorr = importCorr / corrTimesIm
 
     # plot import and export side by side and sort in 3 different ways
     titles = ['', '-load', '-degree']
@@ -212,7 +218,7 @@ if 'avg' in task:
 
         plt.figure(figsize=(12, 6))
         ax = plt.subplot(121)
-        plt.pcolormesh(exportCorr[order], norm=norm)
+        plt.pcolormesh(exportCorr[order], norm=norm, cmap='Blues')
         plt.colorbar()
         ax.set_xticks(np.linspace(.5, 9.5, 10))
         ax.set_xticklabels(np.linspace(.1, 1, 10))
@@ -222,7 +228,7 @@ if 'avg' in task:
         plt.title('Export color mix')
 
         ax = plt.subplot(122)
-        plt.pcolormesh(importCorr[order], norm=norm)
+        plt.pcolormesh(importCorr[order], norm=norm, cmap='Blues')
         plt.colorbar()
         ax.set_xticks(np.linspace(.5, 9.5, 10))
         ax.set_xticklabels(np.linspace(.1, 1, 10))
