@@ -138,7 +138,7 @@ if 'plot' in task:
             plt.figure()
             ax = plt.subplot()
             plt.pcolormesh(corr[order], norm=norm, cmap='Blues')
-            plt.colorbar()
+            plt.colorbar().set_label(label='pearson correlation', size=11)
             ax.set_xticks(np.linspace(.5, 9.5, 10))
             ax.set_xticklabels(np.linspace(.1, 1, 10))
             ax.set_yticks(np.linspace(.5, 29.5, 30))
@@ -216,10 +216,10 @@ if 'avg' in task:
         order = orders[m]
         names = nameList[m]
 
-        plt.figure(figsize=(12, 6))
+        plt.figure(figsize=(11, 5))
         ax = plt.subplot(121)
         plt.pcolormesh(exportCorr[order], norm=norm, cmap='Blues')
-        plt.colorbar()
+        plt.colorbar().set_label(label='pearson correlation', size=11)
         ax.set_xticks(np.linspace(.5, 9.5, 10))
         ax.set_xticklabels(np.linspace(.1, 1, 10))
         ax.set_yticks(np.linspace(.5, 29.5, 30))
@@ -229,7 +229,7 @@ if 'avg' in task:
 
         ax = plt.subplot(122)
         plt.pcolormesh(importCorr[order], norm=norm, cmap='Blues')
-        plt.colorbar()
+        plt.colorbar().set_label(label='pearson correlation', size=11)
         ax.set_xticks(np.linspace(.5, 9.5, 10))
         ax.set_xticklabels(np.linspace(.1, 1, 10))
         ax.set_yticks(np.linspace(.5, 29.5, 30))
