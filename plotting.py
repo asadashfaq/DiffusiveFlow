@@ -244,3 +244,18 @@ def plotFractions(n, t):
     plt.title(names[n] + ' ' + direction + ' t=' + str(t), fontsize=13)
     plt.savefig(nodePath + '/' + 't_' + str(t) + '.png', bbox_inches='tight')
     plt.close()
+
+
+def plotTotal(t=100):
+    linkFlowEx = np.sum(np.sum(np.load('./results/linkFlow_export.npy'), 0), 1)
+    F = np.load('./input/linear-flows.npy')[:, t]
+    plt.figure(figsize=(10, 5))
+    plt.bar(range(0, 50), linkFlowEx, width, edgecolor='none', color='SteelBlue')
+    plt.bar(np.arange(shift, 50 + shift, 1), F, width, edgecolor='none', color='LightSteelBlue')
+    plt.ylabel('Flow [MW]')
+    plt.xticks(np.arange((width + shift) * .5, 50 + (width + shift) * .5, 1), linkNames, rotation=90, fontsize=9)
+    plt.xlim(xmin=0, xmax=50)
+    plt.grid(True)
+    plt.legend(('Diffusive flow', 'Up- down stream'), loc='best', fontsize=10)
+    plt.savefig('./figures/total/t_' + str(t) + '.png', bbox_inches='tight')
+    plt.close()
