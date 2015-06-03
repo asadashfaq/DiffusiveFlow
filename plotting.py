@@ -240,7 +240,7 @@ def plotFractions(n, t):
     plt.xticks(np.linspace(.5, 29.5, 30), names, rotation=75, fontsize=10)
     ax.xaxis.set_tick_params(width=0)
     ax.yaxis.set_tick_params(width=0)
-    plt.ylabel('fractions')
+    plt.ylabel(r'$\eta$')
     plt.title(names[n] + ' ' + direction + ' t=' + str(t), fontsize=13)
     plt.savefig(nodePath + '/' + 't_' + str(t) + '.png', bbox_inches='tight')
     plt.close()

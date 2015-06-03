@@ -143,7 +143,7 @@ if 'plot' in task:
             ax.set_xticklabels(np.linspace(.1, 1, 10))
             ax.set_yticks(np.linspace(.5, 29.5, 30))
             ax.set_yticklabels(newNames[order], ha="right", va="center", fontsize=8)
-            plt.xlabel('fraction')
+            plt.xlabel(r'$\eta$')
             plt.savefig('./figures/fraction correlation/t_' + str(t) + title + '.png', bbox_inches='tight')
             plt.close()
 
@@ -224,7 +224,7 @@ if 'avg' in task:
         ax.set_xticklabels(np.linspace(.1, 1, 10))
         ax.set_yticks(np.linspace(.5, 29.5, 30))
         ax.set_yticklabels(names, ha="right", va="center", fontsize=8)
-        plt.xlabel('fraction')
+        plt.xlabel(r'$\eta$')
         plt.title('Export color mix')
 
         ax = plt.subplot(122)
@@ -234,6 +234,6 @@ if 'avg' in task:
         ax.set_xticklabels(np.linspace(.1, 1, 10))
         ax.set_yticks(np.linspace(.5, 29.5, 30))
         ax.set_yticklabels(names, ha="right", va="center", fontsize=8)
-        plt.xlabel('fraction')
+        plt.xlabel(r'$\eta$')
         plt.title('Import color mix')
         plt.savefig('./figures/avg/power_mix_correlation-' + str(len(timeSteps)) + title + '.png', bbox_inches='tight')
