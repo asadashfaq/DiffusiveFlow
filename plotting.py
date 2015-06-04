@@ -84,30 +84,28 @@ def plotNodesSingle(t=100, consistency=False):
     nodes = pmim.shape[0]
 
     for n in range(nodes):
+        plt.figure(figsize=(10, 4))
         if phi[n, t] > 0:
+            s = '+'
             pmim[n, n] = 0
             if consistency: print ' +  , ', sum(dpm[:, n]) - phi[n, t]
             pmex[n, :] = pmex[n, :] / sum(pmex[n, :]) * phi[n, t]
-            plt.figure(figsize=(7, 6))
             plt.bar(range(nodes), dpm[:, n], width, edgecolor='none', color='SteelBlue')
             plt.bar(np.arange(shift, nodes + shift, 1), pmex[n, :], width, edgecolor='none', color='LightSteelBlue')
             plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=10)
-            plt.title('Export', fontsize=12)
         elif phi[n, t] < 0:
+            s = '-'
             pmex[n, n] = 0
             if consistency: print '- , ', sum(dpm[n, :]) + phi[n, t]
             pmim[n, :] = pmim[n, :] / sum(pmim[n, :]) * abs(phi[n, t])
-            plt.figure(figsize=(7, 6))
             plt.bar(range(nodes), dpm[n, :], width, edgecolor='none', color='SteelBlue')
             plt.bar(np.arange(shift, nodes + shift, 1), pmim[n, :], width, edgecolor='none', color='LightSteelBlue')
             plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=10)
-            plt.title('Import', fontsize=12)
         plt.grid(True)
-        plt.title(names[n] + " (" + str(int(round(phi[n, t]))) + "), t = " + str(t), fontsize=14)
         plt.ylabel('MW')
         plt.ylim(ymin=0)
-        plt.legend(('Diffusive flow', 'Up/down stream'), loc='best')
-        plt.savefig('./figures/nodes/n_' + str(n) + '_t_' + str(t) + '_single.png', bbox_inches='tight')
+        plt.legend(('Diffusive flow', 'Up/down stream'), loc='best', fontsize=10)
+        plt.savefig('./figures/nodes/n_' + str(n) + '_t_' + str(t) + '_single' + s + '.png', bbox_inches='tight')
         plt.close()
 
 
@@ -123,22 +121,19 @@ def plotLinks(t=100):
     nodes = linkFlowEx.shape[1]
     for l in range(len(LinkExport)):
         plt.figure(figsize=(11, 4))
-        plt.subplot(1, 2, 1)
+        ax1 = plt.subplot(1, 2, 1)
         b = plt.bar(np.arange(0, nodes), linkFlowEx[l, :], width, edgecolor='none', color='SteelBlue')
         c = plt.bar(np.arange(shift, nodes + shift, 1), LinkExport[l, :] * direction[l], width, edgecolor='none', color='LightSteelBlue')
-        plt.title(linkNames[l] + ' export flow')
         plt.ylabel('MW')
         plt.grid(True)
         plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=9)
+        ax1.legend((b, c), ('Diffusive flow', 'Up/down stream'), bbox_to_anchor=(0, 1.15), ncol=2, loc=2, borderaxespad=0., fontsize=11)
 
-        plt.subplot(1, 2, 2)
+        ax2 = plt.subplot(1, 2, 2)
         b = plt.bar(np.arange(0, nodes), linkFlowIm[l, :], width, edgecolor='none', color='SteelBlue')
         c = plt.bar(np.arange(shift, nodes + shift, 1), LinkImport[l, :] * direction[l], width, edgecolor='none', color='LightSteelBlue')
-        plt.title(linkNames[l] + ' import flow')
-        plt.ylabel('MW')
         plt.grid(True)
         plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=9)
-        plt.legend((b, c), ('Diffusive flow', 'Up/down stream'), bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize=10)
 
         plt.savefig('./figures/links/l_' + str(l) + '_t_' + str(t) + '.png', bbox_inches='tight')
         plt.close()
@@ -162,21 +157,22 @@ def plotUsage(t=100, consistency=False):
                 print ' +  , ', sum(np.abs(linkFlowEx[:, n])) / sum(LinkExport[:, n])
         plt.figure(figsize=(11, 4))
         if phi[n, t] < 0:
+            s = '-'
             plt.bar(range(0, 50), np.abs(linkFlowIm[:, n]), width, edgecolor='none', color='SteelBlue')
             plt.bar(np.arange(shift, 50 + shift, 1), LinkImport[:, n], width, edgecolor='none', color='LightSteelBlue')
             plt.ylabel('import [MW]')
             plt.xticks(np.arange((width + shift) * .5, 50 + (width + shift) * .5, 1), linkNames, rotation=90, fontsize=10)
             plt.xlim(xmin=0, xmax=50)
         elif phi[n, t] > 0:
+            s = '+'
             plt.bar(range(0, 50), np.abs(linkFlowEx[:, n]), width, edgecolor='none', color='SteelBlue')
             plt.bar(np.arange(shift, 50 + shift, 1), LinkExport[:, n], width, edgecolor='none', color='LightSteelBlue')
             plt.ylabel('export [MW]')
             plt.xticks(np.arange((width + shift) * .5, 50 + (width + shift) * .5, 1), linkNames, rotation=90, fontsize=10)
         plt.grid(True)
         plt.ylim(ymin=0)
-        plt.title(names[n] + " (" + str(int(round(phi[n, t]))) + "), t = " + str(t), fontsize=14)
         plt.legend(('Diffusive flow', 'Up- down stream'), loc='best', fontsize=10)
-        plt.savefig('./figures/usage/' + str(n) + '_t_' + str(t) + '.png', bbox_inches='tight')
+        plt.savefig('./figures/usage/usage_' + str(n) + '_t_' + str(t) + s + '.png', bbox_inches='tight')
         plt.close()
 
 
@@ -241,8 +237,7 @@ def plotFractions(n, t):
     ax.xaxis.set_tick_params(width=0)
     ax.yaxis.set_tick_params(width=0)
     plt.ylabel(r'$\eta$')
-    plt.title(names[n] + ' ' + direction + ' t=' + str(t), fontsize=13)
-    plt.savefig(nodePath + '/' + 't_' + str(t) + '.png', bbox_inches='tight')
+    plt.savefig(nodePath + '/fractions_' + 't_' + str(t) + '_' + direction + '.png', bbox_inches='tight')
     plt.close()
 
 
