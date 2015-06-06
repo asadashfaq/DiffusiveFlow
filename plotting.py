@@ -67,7 +67,7 @@ def plotNodes(t=100, consistency=False):
         plt.grid(True)
 
         plt.suptitle(names[n] + " (" + str(int(round(phi[n, t]))) + "), t = " + str(t), fontsize=14)
-        plt.savefig('./figures/nodes/n_' + str(n) + '_t_' + str(t) + '.png', bbox_inches='tight')
+        plt.savefig('./figures/nodes/n_' + str(n) + '_t_' + str(t) + '.pdf', bbox_inches='tight')
         plt.close()
 
 
@@ -105,7 +105,7 @@ def plotNodesSingle(t=100, consistency=False):
         plt.ylabel('MW')
         plt.ylim(ymin=0)
         plt.legend(('Diffusion', 'Min. dissipation'), loc='best', fontsize=10)
-        plt.savefig('./figures/nodes/n_' + str(n) + '_t_' + str(t) + '_single' + s + '.png', bbox_inches='tight')
+        plt.savefig('./figures/nodes/n_' + str(n) + '_t_' + str(t) + '_single' + s + '.pdf', bbox_inches='tight')
         plt.close()
 
 
@@ -135,7 +135,7 @@ def plotLinks(t=100):
         plt.grid(True)
         plt.xticks(np.arange((width + shift) * .5, nodes + (width + shift) * .5, 1), names, rotation=75, fontsize=9)
 
-        plt.savefig('./figures/links/l_' + str(l) + '_t_' + str(t) + '.png', bbox_inches='tight')
+        plt.savefig('./figures/links/l_' + str(l) + '_t_' + str(t) + '.pdf', bbox_inches='tight')
         plt.close()
 
 
@@ -172,7 +172,7 @@ def plotUsage(t=100, consistency=False):
         plt.grid(True)
         plt.ylim(ymin=0)
         plt.legend(('Diffusion', 'Min. dissipation'), loc='best', fontsize=10)
-        plt.savefig('./figures/usage/usage_' + str(n) + '_t_' + str(t) + s + '.png', bbox_inches='tight')
+        plt.savefig('./figures/usage/usage_' + str(n) + '_t_' + str(t) + s + '.pdf', bbox_inches='tight')
         plt.close()
 
 
@@ -201,7 +201,7 @@ def plotFraction(n, t, f):
     plt.title(names[n] + ' ' + direction + ' t=' + str(t), fontsize=12)
     plt.ylabel('MW')
     plt.ylim(ymin=0)
-    plt.savefig('./figures/fraction/n_' + str(n) + '_t_' + str(t) + '_f_' + str(f) + '.png', bbox_inches='tight')
+    plt.savefig('./figures/fraction/n_' + str(n) + '_t_' + str(t) + '_f_' + str(f) + '.pdf', bbox_inches='tight')
 
 
 def plotFractions(n, t):
@@ -237,7 +237,7 @@ def plotFractions(n, t):
     ax.xaxis.set_tick_params(width=0)
     ax.yaxis.set_tick_params(width=0)
     plt.ylabel(r'$\eta$')
-    plt.savefig(nodePath + '/fractions_' + 't_' + str(t) + '_' + direction + '.png', bbox_inches='tight')
+    plt.savefig(nodePath + '/fractions_' + 't_' + str(t) + '_' + direction + '.pdf', bbox_inches='tight')
     plt.close()
 
 
@@ -252,5 +252,5 @@ def plotTotal(t=100):
     plt.xlim(xmin=0, xmax=50)
     plt.grid(True)
     plt.legend(('Diffusion', 'Min. dissipation'), loc='best', fontsize=10)
-    plt.savefig('./figures/total/total_t_' + str(t) + '.png', bbox_inches='tight')
+    plt.savefig('./figures/total/total_t_' + str(t) + '.pdf', bbox_inches='tight')
     plt.close()
