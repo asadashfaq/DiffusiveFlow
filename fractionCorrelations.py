@@ -5,6 +5,8 @@ import numpy as np
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.colors import LinearSegmentedColormap
+from figutils import *
 
 """
 Investigating correlation of power mixes between diffusive flow and up/down
@@ -36,29 +38,7 @@ nodes = 30
 fractions = np.linspace(.1, 1, 10)
 timeSteps = np.load('./results/fraction/timeSteps.npy')
 rr = 3  # rounding of power mixes, number of decimal places
-
-names = np.array(['AT', 'FI', 'NL', 'BA', 'FR', 'NO', 'BE', 'GB', 'PL', 'BG',
-                  'GR', 'PT', 'CH', 'HR', 'RO', 'CZ', 'HU', 'RS', 'DE', 'IE',
-                  'SE', 'DK', 'IT', 'SI', 'ES', 'LU', 'SK', 'EE', 'LV', 'LT'],
-                 dtype='|S4')
-
-# Node indices and names sorted after descending mean load
-loadOrder = [18, 4, 7, 22, 24, 20, 8, 5, 2, 6, 1, 15, 0, 10, 14,
-             9, 11, 12, 16, 21, 17, 19, 3, 26, 13, 29, 27, 23, 28, 25]
-
-loadNames = np.array(['DE', 'FR', 'GB', 'IT', 'ES', 'SE', 'PL', 'NO', 'NL',
-                      'BE', 'FI', 'CZ', 'AT', 'GR', 'RO', 'BG', 'PT', 'CH',
-                      'HU', 'DK', 'RS', 'IE', 'BA', 'SK', 'HR', 'LT', 'EE',
-                      'SI', 'LV', 'LU'], dtype='|S4')
-
-# Node indices and names ordered after descending node degree
-degreeOrder = [18, 0, 4, 22, 20, 17, 16, 13, 2, 8, 12, 15, 5, 7, 9,
-               14, 21, 23, 26, 28, 10, 24, 6, 3, 27, 1, 19, 11, 25, 29]
-
-degreeNames = np.array(['DE', 'AT', 'FR', 'IT', 'SE', 'RS', 'HU', 'HR', 'NL',
-                        'PL', 'CH', 'CZ', 'NO', 'GB', 'BG', 'RO', 'DK', 'SI',
-                        'SK', 'LV', 'GR', 'ES', 'BE', 'BA', 'EE', 'FI', 'IE',
-                        'PT', 'LU', 'LT'], dtype='|S4')
+Blues_cmap = LinearSegmentedColormap('blue', Blues_data, 1000)
 
 if 'plot' in task:
     if len(sys.argv) > 2:
@@ -137,8 +117,10 @@ if 'plot' in task:
 
             plt.figure()
             ax = plt.subplot()
-            plt.pcolormesh(corr[order], norm=norm, cmap='Blues')
-            plt.colorbar().set_label(label='pearson correlation', size=11)
+            plt.pcolormesh(corr[order], norm=norm, cmap=Blues_cmap)
+            cbl = plt.colorbar()
+            cbl.set_label(label='pearson correlation', size=11)
+            cbl.solids.set_edgecolor('face')
             ax.set_xticks(np.linspace(.5, 9.5, 10))
             ax.set_xticklabels(np.linspace(.1, 1, 10))
             ax.set_yticks(np.linspace(.5, 29.5, 30))
@@ -218,8 +200,10 @@ if 'avg' in task:
 
         plt.figure(figsize=(11, 5))
         ax = plt.subplot(121)
-        plt.pcolormesh(exportCorr[order], norm=norm, cmap='Blues')
-        plt.colorbar().set_label(label='pearson correlation', size=11)
+        plt.pcolormesh(exportCorr[order], norm=norm, cmap=Blues_cmap)
+        cbl = plt.colorbar()
+        cbl.set_label(label='pearson correlation', size=11)
+        cbl.solids.set_edgecolor('face')
         ax.set_xticks(np.linspace(.5, 9.5, 10))
         ax.set_xticklabels(np.linspace(.1, 1, 10))
         ax.set_yticks(np.linspace(.5, 29.5, 30))
@@ -227,8 +211,10 @@ if 'avg' in task:
         plt.xlabel(r'$\eta$')
 
         ax = plt.subplot(122)
-        plt.pcolormesh(importCorr[order], norm=norm, cmap='Blues')
-        plt.colorbar().set_label(label='pearson correlation', size=11)
+        plt.pcolormesh(importCorr[order], norm=norm, cmap=Blues_cmap)
+        cbl = plt.colorbar()
+        cbl.set_label(label='pearson correlation', size=11)
+        cbl.solids.set_edgecolor('face')
         ax.set_xticks(np.linspace(.5, 9.5, 10))
         ax.set_xticklabels(np.linspace(.1, 1, 10))
         ax.set_yticks(np.linspace(.5, 29.5, 30))

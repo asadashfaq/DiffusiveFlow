@@ -2,27 +2,16 @@ from __future__ import division
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 from functions import norm
+from figutils import *
 
 """
 Plotting comparison of diffusive flow and up/down stream approach
 """
-
-names = ['AT', 'FI', 'NL', 'BA', 'FR', 'NO', 'BE', 'GB', 'PL', 'BG', 'GR',
-         'PT', 'CH', 'HR', 'RO', 'CZ', 'HU', 'RS', 'DE', 'IE', 'SE', 'DK',
-         'IT', 'SI', 'ES', 'LU', 'SK', 'EE', 'LV', 'LT']
-
-linkNames = ['AT-CH', 'AT-CZ', 'AT-HU', 'AT-DE', 'AT-IT', 'AT-SI', 'FI-SE',
-             'FI-EE', 'NL-NO', 'NL-BE', 'NL-GB', 'NL-DE', 'BA-HR', 'BA-RS',
-             'FR-BE', 'FR-GB', 'FR-CH', 'FR-DE', 'FR-IT', 'FR-ES', 'NO-SE',
-             'NO-DK', 'GB-IE', 'PL-CZ', 'PL-DE', 'PL-SE', 'PL-SK', 'BG-GR',
-             'BG-RO', 'BG-RS', 'GR-IT', 'PT-ES', 'CH-DE', 'CH-IT', 'HR-HU',
-             'HR-RS', 'HR-SI', 'RO-HU', 'RO-RS', 'CZ-DE', 'CZ-SK', 'HU-RS',
-             'HU-SK', 'DE-SE', 'DE-DK', 'DE-LU', 'SE-DK', 'IT-SI', 'EE-LV',
-             'LV-LT']
-
 shift = .3
 width = .5
+Blues_cmap = LinearSegmentedColormap('blue', Blues_data, 1000)
 
 
 def plotNodes(t=100, consistency=False):
@@ -230,8 +219,10 @@ def plotFractions(n, t):
 
     plt.figure(figsize=(10, 4))
     ax = plt.subplot()
-    plt.pcolormesh(mixes, cmap='Blues')
-    plt.colorbar().set_label(label=r'MW', size=10)
+    plt.pcolormesh(mixes, cmap=Blues_cmap)
+    cbl = plt.colorbar()
+    cbl.set_label(label=r'MW', size=10)
+    cbl.solids.set_edgecolor('face')
     plt.yticks(np.linspace(.5, 9.5, 10), fractions)
     plt.xticks(np.linspace(.5, 29.5, 30), names, rotation=75, fontsize=10)
     ax.xaxis.set_tick_params(width=0)
